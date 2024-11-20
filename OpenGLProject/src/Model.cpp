@@ -205,8 +205,31 @@ unsigned int Model::texture_from_file(const char* path, const std::string& direc
     return textureID;
 }
 
-void Model::draw_model(const Program& program) {
-    for (int i = 0;i < meshes.size();i++) {
-        meshes[i].draw(program);
+void Model::draw_model(const Program& program,bool draw_outline) {
+
+    if (!draw_outline) {
+        for (int i = 0;i < meshes.size();i++) {
+            meshes[i].draw(program);
+        }
+    }
+    else {
+        
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        for (int i = 0;i < meshes.size();i++) {
+            meshes[i].draw(program);
+        }
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+        program.set_uniform_4fv("outline_color", glm::vec4(1.0f)); 
+        program.set_uniform_1f("outline", 0.01f);
+        for (int i = 0;i < meshes.size();i++) {
+            meshes[i].draw(program);
+        }
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
     }
 }

@@ -9,6 +9,12 @@ Program::~Program(){
     glDeleteProgram(ID);
 }
 
+void Program::setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
+    parse_shader(GL_VERTEX_SHADER, vertexShaderPath);
+    parse_shader(GL_FRAGMENT_SHADER, fragmentShaderPath);
+    link();
+}
+
 void Program::parse_shader(GLint shader_type,const std::string &path){
     
     unsigned int shader_id;
@@ -53,8 +59,8 @@ void Program::parse_shader(GLint shader_type,const std::string &path){
     }
 
     glAttachShader(ID,shader_id);
-    attached_shaders[shader_count] = shader_id;
-    shader_count++;
+    attachedShaders[shaderCount] = shader_id;
+    shaderCount++;
 
     shader_file.close();
 }
@@ -122,12 +128,12 @@ void Program::set_uniform_mat_4fv(const std::string& uniform_name,const glm::mat
     glUniformMatrix4fv(glGetUniformLocation(ID,uniform_name.c_str()), 1,GL_FALSE,glm::value_ptr(mat4));
 }
 
-void Program::add_texture(const std::string& path, int file_format, int data_format, int channel, GLuint& textureID) {
+void Program::add_texture(const std::string& path, int file_format, int data_format,unsigned int channel) {
     stbi_set_flip_vertically_on_load(true);
 
     int width, height, nrchannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrchannels, 0);
-
+    unsigned int textureID;
     glGenTextures(1, &textureID);  // Generate a unique ID for each texture
     glActiveTexture(channel);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -139,25 +145,31 @@ void Program::add_texture(const std::string& path, int file_format, int data_for
 
     glTexImage2D(GL_TEXTURE_2D, 0, file_format, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
+    textures[textureID] = channel;
     stbi_image_free(data);
 }
 
 void Program::use(){
+
+    for (const auto& pair : textures) {
+        glActiveTexture(pair.second);
+        glBindTexture(GL_TEXTURE_2D,pair.first);
+    }
     glUseProgram(ID);
 }
 
 void Program::stop_using(){
-    glUseProgram(0);
 
     int currently_bound_program;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currently_bound_program);
     if(currently_bound_program == ID){
-        glBindVertexArray(0);
-        std::cout << "Cleared Successfuly"<< "\n";
+        glUseProgram(0);
     }else{
-        std::cout << "Program trying to creal Program which it is not responsible of." << "\n";
+        std::cout << "Program trying to clear Program which it is not responsible of." << "\n";
     }
+
 }
 
 void Program::link(){
@@ -172,11 +184,11 @@ void Program::link(){
         glGetProgramInfoLog(ID,512,NULL,infoLog);
         std::cout << "ERROR::LINK::" << ID << "::LINK_FAILED\n" << infoLog << std::endl;
     }
-    for(int i = shader_count;i>=0;i--){
-        shader_count--;
-        if ( attached_shaders != 0){
-            glDeleteShader(attached_shaders[i]);
-            attached_shaders[i] = 0;
+    for(int i = shaderCount;i>=0;i--){
+        shaderCount--;
+        if ( attachedShaders != 0){
+            glDeleteShader(attachedShaders[i]);
+            attachedShaders[i] = 0;
         }
     }
 }

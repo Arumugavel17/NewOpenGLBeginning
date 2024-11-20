@@ -7,6 +7,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <Program.hpp>
+#include <glm/glm.hpp>
+
 
 class Model {
 public:
@@ -66,7 +68,7 @@ public:
     void process_node(const aiNode* node, const aiScene* scene);
     Mesh process_mesh(const aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> load_material_textures(aiMaterial* mat, aiTextureType type, std::string typeName);
-    void draw_model(const Program &program);
+    void draw_model(const Program &program,bool draw_outline = false);
     
     void use_VAO();
     void clear_VAO();

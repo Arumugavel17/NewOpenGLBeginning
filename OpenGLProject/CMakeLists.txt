@@ -16,14 +16,14 @@ include_directories(include/header/vendor/assimp/build/include)
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 # Create the executable
-add_executable(OpenGLProject ${SOURCES})
+add_executable(OpenGLProject ${SOURCES} )
 
 # Specify the path to the GLFW library
 set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
 
 # Link the GLFW and OpenGL libraries
 target_link_libraries(OpenGLProject OpenGL32 ${GLFW_LIBRARIES})
-
+ 
 # Link Assimp library
 set(ASSIMP_LIBRARY_DIR "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/include/header/vendor/assimp/build")
 set(ASSIMP_LIBRARY "${ASSIMP_LIBRARY_DIR}/lib/Debug/assimp-vc143-mtd.lib")

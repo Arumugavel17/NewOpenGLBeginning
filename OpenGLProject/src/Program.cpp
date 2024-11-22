@@ -151,6 +151,22 @@ void Program::add_texture(const std::string& path, int file_format, int data_for
     stbi_image_free(data);
 }
 
+void Program::add_texture(unsigned int channel, unsigned int textureID,bool overrideTexture) {
+
+    if (!overrideTexture) {
+        for (const auto& pair : textures) {
+            std::cout << channel << " : " << textures[channel] << "\n";
+            if (pair.first == channel) {
+                std::cout << ("TEXTURE::CHANNEL_OCCUPIED");
+            }
+        }
+    }
+
+    glActiveTexture(channel);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
+
 void Program::use(){
 
     for (const auto& pair : textures) {

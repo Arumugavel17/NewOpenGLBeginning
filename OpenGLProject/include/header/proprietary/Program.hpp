@@ -26,6 +26,8 @@ public:
     void set_uniform_mat_4fv(const std::string& uniformName,const glm::mat4& mat4) const;
 
     void add_texture(const std::string& path, int fileFormat, int dataFormat,unsigned int channel);
+    void add_texture(unsigned int channel, unsigned int textureID,bool overrideTexture = false);
+
     unsigned int get_id() const ;
     
     void setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);

@@ -1,6 +1,3 @@
-//Vendor Libraries
-#include <stb_image.h>
-
 //cpp standard libraries
 #include <iostream>
 #include <string>
@@ -20,18 +17,20 @@
 #include <Program.hpp>
 #include <Model.hpp>
 #include <Application.hpp>
+#include <FrameBuffer.hpp>
 
 std::array<float, 20> vertices_ = {
-   0.5f,  0.5f,  0.5f, 1.0f, 1.0f,  // Top Right
-   0.5f, -0.5f,  0.5f, 1.0f, 0.0f,  // Bottom Right
-  -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,  // Bottom Left
-  -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,  // Top Left
+    // Positions         // Texture Coords
+    -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, // Top Left
+    -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, // Bottom Left
+     1.0f, -1.0f,  0.0f,  1.0f, 0.0f, // Bottom Right
+     1.0f,  1.0f,  0.0f,  1.0f, 1.0f  // Top Right
 };
 
 std::array<unsigned int, 36> indices = {
     // Front face
-    0, 3, 1,   // First triangle
-    1, 2, 3  // Second triangle
+    0, 1, 2,
+    0, 2, 3
 };
 
 int main() {
@@ -48,26 +47,37 @@ int main() {
     applicationInstance.getCursorPosition(&x, &y);
     cameraInstance.process_mouse_input_impl(x, y);
 
-    std::string window_vertex_shader_source = "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/shaders/light_source_shaders/vertexshader.glsl";
-    std::string window_fragment_shader_source = "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/shaders/light_source_shaders/fragmentshader.glsl";
+    std::string window_vertex_shader_source = "shaders/window_shaders/vertexshader.glsl";
+    std::string window_fragment_shader_source = "shaders/window_shaders/fragmentshader.glsl";
 
-    std::string cube_vertex_shader_source = "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/shaders/cube_shaders/vertexshader.glsl";
-    std::string cube_fragment_shader_source = "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/shaders/cube_shaders/fragmentshader.glsl";
-    //
+    std::string cube_vertex_shader_source = "shaders/model_shaders/vertexshader.glsl";
+    std::string cube_fragment_shader_source = "shaders/model_shaders/fragmentshader.glsl";
+    
+    std::string fragment_vertex_shader_source = "shaders/fragment_shaders/vertexshader.glsl";
+    std::string fragment_fragment_shader_source = "shaders/fragment_shaders/fragmentshader.glsl";
+
+    std::string skybox_vertex_shader_source = "shaders/Skybox_shaders/vertexshader.glsl";
+    std::string skybox_fragment_shader_source = "shaders/Skybox_shaders/fragmentshader.glsl";
+
+    Program skyBox;
+    skyBox.setup(skybox_vertex_shader_source, skybox_fragment_shader_source);
+
     Program cubeProgram;
     cubeProgram.setup(cube_vertex_shader_source, cube_fragment_shader_source);
 
-    Model cubeModel("C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/assets/Models/backpack/backpack.obj");
+    Model cubeModel("assets/Models/backpack/backpack.obj");
+    Program windowProgram;
+    windowProgram.setup(window_vertex_shader_source, window_fragment_shader_source);
+    windowProgram.use();
+    windowProgram.add_texture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_TEXTURE0);
+    windowProgram.set_uniform_1i("hello", 0);
 
     Model windowModel(vertices_, indices, true);
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
 
-    Program windowProgram;
-    windowProgram.setup(window_vertex_shader_source, window_fragment_shader_source);
-    windowProgram.use();
-    windowProgram.add_texture("C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/assets/textures/window.png", GL_RGBA, GL_RGBA, GL_TEXTURE1);
-    windowProgram.set_uniform_1i("hello", 1);
+    Program fragmentProgram;
+    fragmentProgram.setup(fragment_vertex_shader_source, fragment_fragment_shader_source);
 
     glm::mat4 model_coord = glm::mat4(1.0f);
     glm::mat4 projection_coord;
@@ -90,7 +100,11 @@ int main() {
     glCullFace(GL_BACK);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    FrameBuffer frameBuffer(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
+
     while (!applicationInstance.windowShouldClose()) {
+        
+        frameBuffer.bind();
         // Clear color, depth, and stencil buffers
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -125,6 +139,16 @@ int main() {
         windowProgram.stop_using();
         glEnable(GL_STENCIL_TEST);
         glStencilMask(0xFF);
+        frameBuffer.un_bind();
+        
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        fragmentProgram.use();
+        windowModel.use_VAO();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D,frameBuffer.get_tex_color_buffer());
+        windowProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(),true);
+        windowModel.draw_elements(6, 1);
 
         glfwSwapBuffers(applicationInstance.getWindow()); 
         glfwPollEvents();

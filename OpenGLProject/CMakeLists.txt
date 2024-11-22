@@ -36,6 +36,18 @@ add_custom_command(TARGET OpenGLProject POST_BUILD
     ${ASSIMP_LIBRARY_DIR}/bin/Debug/assimp-vc143-mtd.dll
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assimp-vc143-mtd.dll)
 
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}") 
+message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/shaders") 
+set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/shaders") 
+# Add a custom command to copy the folder after the target is built 
+add_custom_command(TARGET OpenGLProject POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR})
+
+set(ASSETS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/assets") 
+set(ASSETS_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/assets") 
+# Add a custom command to copy the folder after the target is built 
+add_custom_command(TARGET OpenGLProject POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSETS_SOURCE_DIR} ${ASSETS_DEST_DIR})
 
 # Set the C++ standard
 if (CMAKE_VERSION VERSION_GREATER 3.12)

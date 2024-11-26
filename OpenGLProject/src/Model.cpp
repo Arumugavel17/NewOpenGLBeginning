@@ -31,7 +31,6 @@ void Model::clear_VAO() {
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currently_bound_VAO);
     if (currently_bound_VAO == VAO) {
         glBindVertexArray(0);
-        std::cout << "Cleared Successfuly" << "\n";
     }
     else {
         std::cout << "Model trying to creal VAO which it is not responsible of." << "\n";

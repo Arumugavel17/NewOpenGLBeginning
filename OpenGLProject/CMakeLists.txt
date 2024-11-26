@@ -11,14 +11,14 @@ include_directories(include/header/vendor)
 include_directories(include/header/proprietary)
 include_directories(include/header/vendor/assimp/include)
 include_directories(include/header/vendor/assimp/build/include)
-
+  
 # Automatically gather all .cpp and .c source files in the implementation folder
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 # Create the executable
 add_executable(OpenGLProject ${SOURCES} )
 
-# Specify the path to the GLFW library
+# Specify the path to the GLFW library 
 set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
 
 # Link the GLFW and OpenGL libraries
@@ -39,15 +39,29 @@ add_custom_command(TARGET OpenGLProject POST_BUILD
 message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}") 
 message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
 
-set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/shaders") 
-set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/shaders") 
-# Add a custom command to copy the folder after the target is built 
-add_custom_command(TARGET OpenGLProject POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR})
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/shaders")
+set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/shaders")
 
-set(ASSETS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/assets") 
-set(ASSETS_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/assets") 
-# Add a custom command to copy the folder after the target is built 
-add_custom_command(TARGET OpenGLProject POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSETS_SOURCE_DIR} ${ASSETS_DEST_DIR})
+# Add a custom target to always copy the shaders if they are updated
+add_custom_target(copy_shaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR}
+    COMMENT "Copying shaders to the build directory..."
+)
+
+# Ensure the 'copy_shaders' target runs before building the OpenGLProject target
+add_dependencies(OpenGLProject copy_shaders)
+
+set(ASSETS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/OpenGLProject/assets")
+set(ASSETS_DEST_DIR "${CMAKE_BINARY_DIR}/OpenGLProject/assets")
+
+# Add a custom target to always copy the shaders if they are updated
+add_custom_target(copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSETS_SOURCE_DIR} ${ASSETS_DEST_DIR}
+    COMMENT "Copying shaders to the build directory..."
+)
+
+# Ensure the 'copy_shaders' target runs before building the OpenGLProject target
+add_dependencies(OpenGLProject copy_assets)
 
 # Set the C++ standard
 if (CMAKE_VERSION VERSION_GREATER 3.12)

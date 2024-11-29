@@ -212,7 +212,8 @@ void Model::draw_model(const Program& program,bool draw_outline) {
         }
     }
     else {
-        
+        program.set_uniform_4fv("outline_color", glm::vec4(0.0f));
+        program.set_uniform_1f("outline", 0);
         glEnable(GL_STENCIL_TEST);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -221,7 +222,6 @@ void Model::draw_model(const Program& program,bool draw_outline) {
             meshes[i].draw(program);
         }
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
         glDisable(GL_DEPTH_TEST);
         program.set_uniform_4fv("outline_color", glm::vec4(1.0f)); 
         program.set_uniform_1f("outline", 0.01f);

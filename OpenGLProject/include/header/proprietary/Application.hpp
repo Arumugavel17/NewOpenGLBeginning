@@ -1,7 +1,8 @@
 #pragma once
 
 //cpp standard libraries
-#include<iostream>
+#include <iostream>
+#include <vector>
 
 //Window libraries
 #include <glad/glad.h>
@@ -20,6 +21,10 @@ public:
     void setMouseCallback(void (*func)(GLFWwindow* window, double xOffset, double yOffset));
     void getCursorPosition(double* x,double* y);
     bool windowShouldClose();
+    void enable(const std::vector<unsigned int>& toEnable);
+    void blend_function(unsigned int sfactor, unsigned int dfactor);
+    void clear(float r, float g, float b, float w, unsigned int clearBuffer);
+
 private:
     GLFWmonitor* monitor;
     const GLFWvidmode* mode;

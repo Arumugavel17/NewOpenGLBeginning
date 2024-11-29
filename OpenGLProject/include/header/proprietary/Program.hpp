@@ -36,6 +36,9 @@ public:
     void use();
     void stop_using();
 private:
+
+    glm::vec4 m_outline_color = glm::vec4(1.0f);
+    float m_outline_width = 0.08f;
     int shaderCount = 0;
     unsigned int ID;
     unsigned int attachedShaders[3] = {

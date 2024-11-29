@@ -68,3 +68,18 @@ bool Application::windowShouldClose(){
 Application::~Application(){
     glfwTerminate();
 }
+
+void Application::enable(const std::vector<unsigned int>& toEnable) {
+    for (const auto& val : toEnable) {
+        glEnable(val);
+    }
+}
+
+void Application::clear(float r, float g, float b, float w, unsigned int clearBuffer) {
+    glClear(clearBuffer);
+    glClearColor(r, g, b, w);
+}
+
+void Application::blend_function(unsigned int sfactor,unsigned int dfactor) {
+    glBlendFunc(sfactor, dfactor);
+}

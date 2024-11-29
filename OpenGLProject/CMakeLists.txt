@@ -25,7 +25,7 @@ set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
 target_link_libraries(OpenGLProject OpenGL32 ${GLFW_LIBRARIES})
  
 # Link Assimp library
-set(ASSIMP_LIBRARY_DIR "C:/Users/arumu/source/repos/OpenGLProject/OpenGLProject/include/header/vendor/assimp/build")
+set(ASSIMP_LIBRARY_DIR "D:/Visual Studios/NewOpenGLBeginning/OpenGLProject/include/header/vendor/assimp/build")
 set(ASSIMP_LIBRARY "${ASSIMP_LIBRARY_DIR}/lib/Debug/assimp-vc143-mtd.lib")
 target_link_libraries(OpenGLProject ${ASSIMP_LIBRARY})
 

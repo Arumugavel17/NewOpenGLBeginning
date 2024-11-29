@@ -92,11 +92,15 @@ int main() {
         position.push_back(glm::vec3(0.0f, 0.0f, i));
     }
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
+    std::vector<unsigned int> EnableList = {
+        GL_DEPTH_TEST,
+        GL_BLEND
+    };
+    applicationInstance.enable(EnableList);
+    applicationInstance.blend_function(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  /*   glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
- */   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ */   
 
     FrameBuffer frameBuffer(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
     
@@ -105,9 +109,8 @@ int main() {
     while (!applicationInstance.windowShouldClose()) {
         frameBuffer.bind();
         // Clear color, depth, and stencil buffers
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        //
+        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+       
         //// Get projection and view matrices from the camera
         projection_coord = cameraInstance.get_projection(applicationInstance.getMode());
         view_coord = cameraInstance.process_key_input(applicationInstance.getWindow());
@@ -115,15 +118,12 @@ int main() {
         skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
         
         cubeProgram.use();
-        cubeProgram.set_uniform_4fv("outline_color", no_outline);
-        cubeProgram.set_uniform_1f("outline", 0.0f);
         cubeProgram.set_uniform_mat_4fv("projection", projection_coord); 
         cubeProgram.set_uniform_mat_4fv("view", view_coord); 
         cubeProgram.set_uniform_mat_4fv("model", model_coord); 
         cubeProgram.set_uniform_3fv("cameraPos", cameraInstance.get_camera_pos()); 
         cubeModel.draw_model(cubeProgram,true);
         cubeProgram.stop_using();
-
 
         windowProgram.use();
         windowModel.use_VAO();
@@ -139,15 +139,12 @@ int main() {
             windowProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), position[i]));
             windowModel.draw_elements(6, 1);
         }
-        windowProgram.stop_using();
 
-        glEnable(GL_STENCIL_TEST);
-        glStencilMask(0xFF);
+        windowProgram.stop_using();
         frameBuffer.un_bind();
 
-        
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
         fragmentProgram.use();
         windowModel.use_VAO();
         //glActiveTexture(GL_TEXTURE0);

@@ -1,0 +1,5 @@
+D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/OpenGLProject.dir
+D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/copy_shaders.dir
+D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/copy_assets.dir
+D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/edit_cache.dir
+D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/rebuild_cache.dir

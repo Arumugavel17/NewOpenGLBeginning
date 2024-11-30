@@ -1,22 +1,25 @@
 // Vertex Shader (triangle_shader.vert)
 #version 330 core
 
-uniform mat4 model;
+out vec3 worldPos;
+
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 cameraPos;
 
-out vec4 fragColor;  // Output color to the fragment shader
+const vec3 vertices[6] = {
+    vec3(-1.0f, 0.0f, -1.0f ),
+    vec3( 1.0f, 0.0f, -1.0f ),
+    vec3( 1.0f, 0.0f,  1.0f ),
+    vec3(-1.0f, 0.0f, -1.0f ),
+    vec3(-1.0f, 0.0f,  1.0f ),
+    vec3( 1.0f, 0.0f,  1.0f )
+};
 
 void main() {
-    // Directly specify triangle vertex data inside the shader (no VBO/EBO)
-    vec3 vertices[3];  // Array of 3 vertices for the triangle
-    vertices[0] = vec3(-0.5f, -0.5f, 0.0f); // First vertex
-    vertices[1] = vec3( 0.5f, -0.5f, 0.0f); // Second vertex
-    vertices[2] = vec3( 0.0f,  0.5f, 0.0f); // Third vertex
-
     // Use gl_VertexID to select the current vertex from the array
-    gl_Position = vec4(vertices[gl_VertexID], 1.0);
-
-    // Set color for the fragment shader
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);  // Red color
+    worldPos = vertices[gl_VertexID];
+    worldPos.x += cameraPos.x;
+    worldPos.z += cameraPos.z;
+    gl_Position = projection * view * vec4(worldPos, 1.0f);
 }

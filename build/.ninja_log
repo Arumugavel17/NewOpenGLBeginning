@@ -1,0 +1,17 @@
+# ninja log v6
+74	341	7546176824635102	CMakeFiles/copy_shaders	140b1a76f9193336
+74	341	7546176824635102	D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/copy_shaders	140b1a76f9193336
+133	1188	7546176825260270	CMakeFiles/copy_assets	448e944d8145be12
+1573	15849	7546169576059152	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Application.cpp.obj	d826240f5ce3543e
+133	1188	7546176825260270	D:/Visual Studios/NewOpenGLBeginning/build/CMakeFiles/copy_assets	448e944d8145be12
+1679	15406	7546169577091405	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/FrameBuffer.cpp.obj	e3a7b353baec0e2b
+1724	15765	7546169577474319	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Mesh.cpp.obj	2b86993d085eab81
+1618	15586	7546169576532267	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Camera.cpp.obj	3abe55e4b25ae86c
+1809	16341	7546169578416316	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Program.cpp.obj	f6e576f8ea4a94e
+15768	16689	7546169717933140	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/helper.cpp.obj	748005907d0710bc
+1763	17253	7546169577943216	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Model.cpp.obj	e047f54e67e42792
+15588	17266	7546169716205354	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/glad.c.obj	b48ec5ed79b84bbb
+16342	18067	7546169723741478	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/stbi_image.cpp.obj	5f7dbf1e44a87f01
+15423	21104	7546169714481754	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/Skybox.cpp.obj	80a212c91e3e76a9
+15851	21310	7546169718718997	CMakeFiles/OpenGLProject.dir/OpenGLProject/src/main.cpp.obj	5eadc6dd2e508c36
+21312	27506	7546169773333338	OpenGLProject.exe	b5c1c1e5f5e9dcbe

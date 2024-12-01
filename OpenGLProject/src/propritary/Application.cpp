@@ -32,9 +32,11 @@ Application::Application() {
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);  
     glGenVertexArrays(1, &VAO);
+
 }
 
 void Application::set_user(void* pointer) {
+    cameraInstance = (Camera*)pointer;
     glfwSetWindowUserPointer(window,pointer);
 }
 
@@ -52,7 +54,7 @@ const GLFWvidmode* Application::getMode() {
 
 void Application::set_scroll_callback(void (*func)(GLFWwindow* window, double xpos, double ypos)) {
     scrollCallback = func;
-    glfwSetScrollCallback(window,scrollCallback);
+    glfwSetScrollCallback(window, scrollCallback);
 }
 
 void Application::set_mouse_callback(void (*func)(GLFWwindow* window, double x_offset, double y_offset)) {
@@ -67,10 +69,16 @@ void Application::get_cursor_position(double* x,double* y) {
 bool Application::main_loop() {
     glfwSwapBuffers(get_window());
     glfwPollEvents();
-    return glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS;
+    clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    return true;
 }
 
 Application::~Application() {
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
 }
 
@@ -93,4 +101,12 @@ void Application::creat_grid(const Program& gridProgram) {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6); 
     glBindVertexArray(0);
+}
+
+void Application::enable_imgui() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(get_window(), true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 }

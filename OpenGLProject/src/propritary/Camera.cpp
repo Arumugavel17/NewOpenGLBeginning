@@ -1,8 +1,10 @@
 #include<Camera.hpp>
 
 Camera::Camera(int screenWidth, int screenHeight) {
-    lastX = screenWidth / 2.0;
-    lastY = screenHeight / 2.0;
+    this->screenHeight = screenHeight;
+    this->screenWidth = screenWidth;
+    lastX = this->screenWidth / 2.0;
+    lastY = this->screenHeight / 2.0;
     yaw = -90.0f;  // Starting yaw so the camera points forward
     pitch = 0.0f;  // Starting pitch level
 }
@@ -17,14 +19,13 @@ void Camera::process_mouse_scroll_impl(double x_offset, double y_offset){
     }
 }   
 
-void Camera::process_mouse_input_impl(double xpos, double ypos) {
-
+void Camera::process_mouse_input_impl(GLFWwindow* window, double xpos, double ypos) {
     double xoffset = xpos - lastX;
     double yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
 
-    double sensitivity = 0.1f;
+    double sensitivity = 0.4f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     
@@ -84,9 +85,9 @@ glm::mat4 Camera::process_key_input(GLFWwindow* window){
 void Camera::process_mouse_input(GLFWwindow* window, double xpos, double ypos) {
     // Obtain the camera instance from the GLFW window user pointer
     Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-    if (camera) {
+    if (camera) {        
         // Call the non-static method using the camera instance
-        camera->process_mouse_input_impl(xpos, ypos);
+           camera->process_mouse_input_impl(window, xpos, ypos);
     }
 }
 

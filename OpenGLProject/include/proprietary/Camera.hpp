@@ -21,8 +21,8 @@ public:
     glm::mat4 get_projection(const GLFWvidmode* mode);
     glm::mat4 get_view();
 
-    void process_mouse_input_impl(double xpos, double ypos);
-    void process_mouse_scroll_impl(double xpos, double ypos);
+    void process_mouse_input_impl(GLFWwindow* window, double xpos, double ypos);
+    void process_mouse_scroll_impl( double xpos, double ypos);
     
     void set_mouse_x_y(double x, double y);
     glm::vec3 get_camera_pos();
@@ -33,7 +33,7 @@ private:
     float lasttime = 0;
     float currenttime = 0;
     float zoom = 45.0f;
-    
+    int screenWidth,screenHeight;
     double lastX = 0,lastY = 0,yaw=-90,pitch;
 
     glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 3.0f);

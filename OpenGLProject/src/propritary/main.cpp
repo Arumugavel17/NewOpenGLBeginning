@@ -1,12 +1,12 @@
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
 
 //cpp standard libraries
 #include <iostream>
 #include <string>
 #include <array>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 //Window libraries
 #include <glad/glad.h>
@@ -52,7 +52,7 @@ int main() {
     applicationInstance.set_scroll_callback(Camera::process_mouse_scroll);
 
     applicationInstance.get_cursor_position(&x, &y);
-    cameraInstance.process_mouse_input_impl(x, y);
+    cameraInstance.process_mouse_input_impl(applicationInstance.get_window(), x, y);
     
     std::string fragment_vertex_shader_source = "shaders/frame_buffer_shaders/vertexshader.glsl";
     std::string fragment_fragment_shader_source = "shaders/frame_buffer_shaders/fragmentshader.glsl";
@@ -97,20 +97,15 @@ int main() {
     Program gridProgram;
     gridProgram.setup(grid_vertex_shader_source,grid_fragment_shader_source);
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGuiIO& io = ImGui::GetIO(); 
-    ImGui_ImplGlfw_InitForOpenGL(applicationInstance.get_window(),true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    float gridSize = 0;
+    
+    unsigned int texture_color_buffer = frameBuffer.get_tex_color_buffer();
+    applicationInstance.enable_imgui();
 
-    int i = 0;
-
-    while (applicationInstance.main_loop()) {
-
-        frameBuffer.bind();
+    while (applicationInstance.main_loop()){
+        //applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //frameBuffer.bind();
         // Clear color, depth, and stencil buffers
-        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // Get projection and view matrices from the camera
         projection_coord = cameraInstance.get_projection(applicationInstance.getMode());
@@ -118,6 +113,7 @@ int main() {
         skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
 
         gridProgram.use();
+        gridProgram.set_uniform_1f("gridCellSize",gridSize);
         gridProgram.set_uniform_mat_4fv("projection", projection_coord);
         gridProgram.set_uniform_mat_4fv("view", view_coord);
         gridProgram.set_uniform_3fv("cameraPos", cameraInstance.get_camera_pos());
@@ -131,62 +127,8 @@ int main() {
         windowProgram.set_uniform_mat_4fv("model",val);
         windowModel.draw_elements(6, 1);
         windowProgram.stop_using();
-        frameBuffer.un_bind();
-        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-        float cellsize = 0.5f;
+        //frameBuffer.un_bind();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        ImGui::Begin("Scene");
-        {
-            ImGui::BeginChild("GameRender");
-
-            float width = ImGui::GetContentRegionAvail().x;
-            float height = ImGui::GetContentRegionAvail().y;
-
-            ImGui::Image(
-                frameBuffer.get_tex_color_buffer(),
-                ImGui::GetContentRegionAvail(),
-                ImVec2(0, 1),
-                ImVec2(1, 0)
-            );
-
-            bool isWindowHovered = ImGui::IsWindowHovered();
-
-            // If the mouse is clicked inside the window, hide the cursor
-            if (isWindowHovered && ImGui::IsMouseClicked(0)) {
-                glfwSetInputMode(applicationInstance.get_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                std::cout << "hide" << i << "\n";
-                i++;
-            }
-            // If the mouse is clicked outside the window, show the cursor
-            else if (!isWindowHovered && ImGui::IsMouseClicked(0)) {
-                glfwSetInputMode(applicationInstance.get_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                std::cout << "show" << i << "\n";
-                i++;
-            }
-
-        }
-        ImGui::EndChild();
-        ImGui::End();
-         
-        ImGui::Begin("Value slider");
-        ImGui::Text("Grid Cell size");
-        if (ImGui::SliderFloat("Slider 1", &cellsize, 0.0f, 0.3f)) {
-            gridProgram.set_uniform_1f("gridCellSize",cellsize);
-        }
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
-
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
     return 1;
 }

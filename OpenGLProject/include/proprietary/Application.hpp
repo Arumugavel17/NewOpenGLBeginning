@@ -18,13 +18,13 @@
 
 class Application{
 public:
-    Application();
+    Application(float bg_r = 0.2f, float bg_g = 0.2f, float bg_b = 0.2f, float bg_a = 0.2f);
     ~Application();
     GLFWmonitor* get_monitor();
     GLFWwindow* get_window();
     const GLFWvidmode* getMode();
     void set_user(void* pointer);
-
+    void set_background(float r,float g, float b, float a);
     void set_scroll_callback(void (*func)(GLFWwindow* window, double xPos, double yPos));
     void set_mouse_callback(void (*func)(GLFWwindow* window, double xOffset, double yOffset));
     void enable_imgui();
@@ -39,6 +39,7 @@ public:
     bool showCursor = true;
 
 private:
+    float bg_r, bg_g, bg_b, bg_a;
 
     typedef void (*ScrollCallback)(GLFWwindow* window, double xpos, double ypos);
     ScrollCallback scrollCallback;

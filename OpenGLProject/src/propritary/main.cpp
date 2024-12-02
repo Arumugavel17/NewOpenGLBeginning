@@ -44,7 +44,7 @@ int main() {
 
     double x = 0, y = 0;
 
-    Application applicationInstance;
+    Application applicationInstance(1.0, 1.0, 1.0, 1.0);
     Camera cameraInstance(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
     applicationInstance.set_user(&cameraInstance);
 
@@ -97,29 +97,30 @@ int main() {
     Program gridProgram;
     gridProgram.setup(grid_vertex_shader_source,grid_fragment_shader_source);
 
-    float gridSize = 0;
+    float gridSize = 50.0f;
+    float gridCellSize = 0.1f;
     
     unsigned int texture_color_buffer = frameBuffer.get_tex_color_buffer();
     applicationInstance.enable_imgui();
-
+    bool draw = false;
     while (applicationInstance.main_loop()){
-        //applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        //frameBuffer.bind();
-        // Clear color, depth, and stencil buffers
 
-        // Get projection and view matrices from the camera
+        //frameBuffer.bind();
+        //applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         projection_coord = cameraInstance.get_projection(applicationInstance.getMode());
         view_coord = cameraInstance.process_key_input(applicationInstance.get_window());
-        skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
-
+        //skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
+        
         gridProgram.use();
-        gridProgram.set_uniform_1f("gridCellSize",gridSize);
+        gridProgram.set_uniform_3fv("gCameraWorldPos",cameraInstance.get_camera_pos());
+        //gridProgram.set_uniform_1f("gridCellSize", gridCellSize);
+        //gridProgram.set_uniform_1f("gridSize", gridSize);
         gridProgram.set_uniform_mat_4fv("projection", projection_coord);
         gridProgram.set_uniform_mat_4fv("view", view_coord);
         gridProgram.set_uniform_3fv("cameraPos", cameraInstance.get_camera_pos());
         applicationInstance.creat_grid(gridProgram);
         gridProgram.stop_using();
-
+        
         windowProgram.use();
         windowModel.use_VAO();
         windowProgram.set_uniform_mat_4fv("projection", projection_coord);
@@ -127,8 +128,41 @@ int main() {
         windowProgram.set_uniform_mat_4fv("model",val);
         windowModel.draw_elements(6, 1);
         windowProgram.stop_using();
-        //frameBuffer.un_bind();
+        frameBuffer.un_bind();
 
+        /*ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        ImGui::Begin("Input Float Example");*/
+
+        // Input for float value
+        //ImGui::InputFloat("Float Value", &gridSize);
+
+        // You can also use a slider to adjust the float value
+        //ImGui::SliderFloat("Grid Cell Size", &gridCellSize, 0.0f, 0.5f);
+        //ImGui::Text("Current value: %.3f", gridSize); // Display the value
+        //ImGui::SliderFloat("Grid Size", &gridSize, 10.0f, 100.0f);
+        //ImGui::Checkbox("Draw", &draw);
+        //if (draw) {
+        //    gridProgram.use();
+        //    gridProgram.set_uniform_1i("draw", 1);
+        //    gridProgram.stop_using();
+        //}
+        //else {
+        //    gridProgram.use(); 
+        //    gridProgram.set_uniform_1i("draw", 0);
+        //    gridProgram.stop_using(); 
+        //}
+        //ImGui::End();
+
+        //ImGui::Render();
+        //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        //fragmentProgram.use();
+        //windowModel.use_VAO();
+        //windowProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
+        //windowModel.draw_elements(6, 1);
     }
     return 1;
 }

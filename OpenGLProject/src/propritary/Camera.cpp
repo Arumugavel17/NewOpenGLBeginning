@@ -55,7 +55,7 @@ glm::mat4 Camera::process_key_input(GLFWwindow* window){
     if(glfwGetKey(window,GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
         speed_factor = 5;
     }else{
-        speed_factor = 2.5f;
+        speed_factor = 0.5f;
     }
 
     const float cameraSpeed = speed_factor * deltatime; // adjust accordingly

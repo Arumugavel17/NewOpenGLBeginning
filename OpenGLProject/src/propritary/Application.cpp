@@ -1,6 +1,6 @@
 #include <Application.hpp>
 
-Application::Application() {
+Application::Application(float r, float g, float b, float a) {
     
     if(!glfwInit()) {
         std::cout << " Failed to Initialize GLFW";
@@ -28,7 +28,10 @@ Application::Application() {
         return;
     }
 
-
+    bg_r = r;
+    bg_g = g;
+    bg_b = b;
+    bg_a = a;
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);  
     glGenVertexArrays(1, &VAO);
@@ -69,7 +72,7 @@ void Application::get_cursor_position(double* x,double* y) {
 bool Application::main_loop() {
     glfwSwapBuffers(get_window());
     glfwPollEvents();
-    clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    clear(bg_r, bg_g, bg_b, bg_a, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     return true;
 }
 

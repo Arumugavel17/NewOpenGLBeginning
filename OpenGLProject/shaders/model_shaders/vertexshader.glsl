@@ -15,7 +15,7 @@ uniform float outline = 0.0f;
 void main()
 {
     TexCoords = aTexCoords;    
-    Normal = mat3(transpose(inverse(model)))     * aNormal;
+    Normal = mat3(transpose(inverse(model))) * aNormal;
     Position = model * vec4(aPos + (aNormal * outline),1.0);
     gl_Position = projection * view * model * vec4(aPos + (aNormal * outline),1.0);
 }

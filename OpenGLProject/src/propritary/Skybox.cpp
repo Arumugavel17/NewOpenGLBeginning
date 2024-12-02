@@ -90,13 +90,13 @@ void Skybox::draw_skybox(glm::mat4 projection,glm::mat4 view) {
 	}
 	glDepthFunc(GL_LEQUAL);  // Change depth function to allow skybox rendering
 	program.use();
-	model->use_VAO();
-	model->draw_triangles(0,36);
+	//model->use_VAO();
+	model->draw_triangles(0,36,"skybox");
 	glActiveTexture(GL_TEXTURE0); 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapID);
 	program.set_uniform_mat_4fv("projection", projection);
 	program.set_uniform_mat_4fv("view", view);
 	program.stop_using();
-	model->clear_VAO();
+	//model->clear_VAO();
 	glDepthFunc(GL_LESS); // Restore default depth function
 }

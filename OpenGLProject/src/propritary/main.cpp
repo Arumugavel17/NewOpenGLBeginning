@@ -54,8 +54,8 @@ int main() {
     applicationInstance.get_cursor_position(&x, &y);
     cameraInstance.process_mouse_input_impl(applicationInstance.get_window(), x, y);
     
-    std::string fragment_vertex_shader_source = "shaders/frame_buffer_shaders/vertexshader.glsl";
-    std::string fragment_fragment_shader_source = "shaders/frame_buffer_shaders/fragmentshader.glsl";
+    std::string frame_buffer_vertex_shader_source = "shaders/frame_buffer_shaders/vertexshader.glsl";
+    std::string frame_buffer_fragment_shader_source = "shaders/frame_buffer_shaders/fragmentshader.glsl";
 
     std::string window_vertex_shader_source = "shaders/window_shaders/vertexshader.glsl";
     std::string window_fragment_shader_source = "shaders/window_shaders/fragmentshader.glsl";
@@ -66,6 +66,9 @@ int main() {
     std::string grid_vertex_shader_source = "shaders/grid_shaders/vertexshader.glsl";
     std::string grid_fragment_shader_source = "shaders/grid_shaders/fragmentshader.glsl";
 
+    std::string cube_vertex_shader_source = "shaders/model_shaders/vertexshader.glsl";
+    std::string cube_fragment_shader_source = "shaders/model_shaders/fragmentshader.glsl";
+
     Program windowProgram;
     windowProgram.setup(window_vertex_shader_source, window_fragment_shader_source);
     windowProgram.use();
@@ -73,13 +76,17 @@ int main() {
     windowProgram.set_uniform_1i("hello", 0);
 
     Program fragmentProgram;
-    fragmentProgram.setup(fragment_vertex_shader_source, fragment_fragment_shader_source);
+    fragmentProgram.setup(frame_buffer_vertex_shader_source, frame_buffer_fragment_shader_source);
     FrameBuffer frameBuffer(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
     Model windowModel(vertices_, indices, true);
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
 
-    glm::mat4 model_coord = glm::mat4(1.0f);
+    Program cubeProgram;
+    cubeProgram.setup(cube_vertex_shader_source, cube_fragment_shader_source);
+    Model cubeModel("assets/Models/backpack/backpack.obj");
+
+    glm::mat4 model_coord = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 5.0f, 0.0f));
     glm::mat4 projection_coord;
     glm::mat4 view_coord;
 
@@ -93,7 +100,8 @@ int main() {
     
     Skybox skyBox;
 
-    glm::mat4 val = glm::mat4(1.0f);
+    glm::mat4 window_position = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,5.0f,0.0f));
+
     Program gridProgram;
     gridProgram.setup(grid_vertex_shader_source,grid_fragment_shader_source);
 
@@ -103,13 +111,15 @@ int main() {
     unsigned int texture_color_buffer = frameBuffer.get_tex_color_buffer();
     applicationInstance.enable_imgui();
     bool draw = false;
+    glm::vec4 outline = glm::vec4(1.0f);
+    glm::vec4 no_outline = glm::vec4(0.0f);
     while (applicationInstance.main_loop()){
 
-        //frameBuffer.bind();
-        //applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        frameBuffer.bind();
+        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         projection_coord = cameraInstance.get_projection(applicationInstance.getMode());
         view_coord = cameraInstance.process_key_input(applicationInstance.get_window());
-        //skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
+        skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
         
         gridProgram.use();
         gridProgram.set_uniform_3fv("gCameraWorldPos",cameraInstance.get_camera_pos());
@@ -125,9 +135,19 @@ int main() {
         windowModel.use_VAO();
         windowProgram.set_uniform_mat_4fv("projection", projection_coord);
         windowProgram.set_uniform_mat_4fv("view", view_coord);
-        windowProgram.set_uniform_mat_4fv("model",val);
-        windowModel.draw_elements(6, 1);
+        windowProgram.set_uniform_mat_4fv("model", window_position);
+        windowModel.draw_elements(6, 1,"window");
         windowProgram.stop_using();
+
+        cubeProgram.use();
+        cubeProgram.set_uniform_4fv("outline_color", no_outline);
+        cubeProgram.set_uniform_1f("outline", 0.0f);
+        cubeProgram.set_uniform_mat_4fv("projection", projection_coord);
+        cubeProgram.set_uniform_mat_4fv("view", view_coord);
+        cubeProgram.set_uniform_mat_4fv("model", model_coord);
+        cubeModel.draw_model(cubeProgram, "backpack", true);
+        cubeProgram.stop_using();
+
         frameBuffer.un_bind();
 
         /*ImGui_ImplOpenGL3_NewFrame();
@@ -159,10 +179,10 @@ int main() {
         //ImGui::Render();
         //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        //fragmentProgram.use();
+        fragmentProgram.use();
         //windowModel.use_VAO();
-        //windowProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
-        //windowModel.draw_elements(6, 1);
+        windowProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
+        windowModel.draw_elements(6, 1,"frame window");
     }
     return 1;
 }

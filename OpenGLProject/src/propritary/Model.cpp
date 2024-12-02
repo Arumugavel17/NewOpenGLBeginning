@@ -5,13 +5,30 @@ void Model::setup(int location, int vertex_attrib_size, bool normalized, int siz
     glEnableVertexAttribArray(location);
 }
 
-void Model::draw_triangles(int start_index, int num_vertex) {
+void Model::draw_triangles(int start_index, int num_vertex,std::string str) {
+    bool valbound = false;
+    if (VAO != 0) {
+        use_VAO();
+        valbound = true;
+    }
     glDrawArrays(GL_TRIANGLES, start_index, num_vertex);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    if (valbound) {
+        clear_VAO(str);
+    }
 }
 
-void Model::draw_elements(int count, int offset) {
-    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+void Model::draw_elements(int count, int offset, std::string str) {
+    bool valbound = false;
+    if (VAO != 0) {
+        use_VAO();
+        valbound = true;
+    }
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)offset);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    if (valbound) {
+        clear_VAO(str);
+    }
 }
 
 Model::~Model() {
@@ -26,14 +43,14 @@ void Model::use_VAO() {
     glBindVertexArray(VAO);
 }
 
-void Model::clear_VAO() {
+void Model::clear_VAO(std::string str) {
     int currently_bound_VAO;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currently_bound_VAO);
     if (currently_bound_VAO == VAO) {
         glBindVertexArray(0);
     }
     else {
-        std::cout << "Model trying to creal VAO which it is not responsible of." << "\n";
+        std::cout << "Model trying to creal VAO which it is not responsible of. " << str << "\n";
     }
 }
 
@@ -204,8 +221,8 @@ unsigned int Model::texture_from_file(const char* path, const std::string& direc
     return textureID;
 }
 
-void Model::draw_model(const Program& program,bool draw_outline) {
-
+void Model::draw_model(const Program& program, std::string str ,bool draw_outline) {
+    
     if (!draw_outline) {
         for (int i = 0;i < meshes.size();i++) {
             meshes[i].draw(program);

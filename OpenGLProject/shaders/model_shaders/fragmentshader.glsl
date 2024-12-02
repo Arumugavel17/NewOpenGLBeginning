@@ -5,7 +5,7 @@ in vec2 TexCoords;
 in vec3 Normal;
 in vec4 Position;
 
-uniform vec4 outline_color;
+uniform vec4 outline_color ;
 uniform sampler2D texture_diffuse1;
 
 uniform vec3 cameraPos;
@@ -18,8 +18,8 @@ void main()
         vec3 R = refract(I, normalize(Normal),1.00f/1.52f);
         vec4 model_color = texture(texture_diffuse1, TexCoords);
         vec4 reflection = vec4(texture(skybox, R).rgb, 1.0);
-        //FragColor = model_color;
-        FragColor = reflection;
+        FragColor = model_color;
+        //FragColor = reflection;
     }
     else{
         FragColor = outline_color;

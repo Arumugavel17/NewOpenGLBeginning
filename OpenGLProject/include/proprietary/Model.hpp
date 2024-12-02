@@ -68,15 +68,15 @@ public:
     void process_node(const aiNode* node, const aiScene* scene);
     Mesh process_mesh(const aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> load_material_textures(aiMaterial* mat, aiTextureType type, std::string typeName);
-    void draw_model(const Program &program,bool draw_outline = false);
+    void draw_model(const Program &program,std::string str,bool draw_outline = false);
     
     void use_VAO();
-    void clear_VAO();
+    void clear_VAO(std::string str);
     unsigned int texture_from_file(const char* path, const std::string& directory);
 
     void setup( int location, int vertex_attrib_size, bool normalized, int size, void* stride);
-    void draw_triangles(int start_index, int num_vertex);
-    void draw_elements(int count, int offset);
+    void draw_triangles(int start_index, int num_vertex, std::string str);
+    void draw_elements(int count, int offset,std::string str);
     
     ~Model();
 

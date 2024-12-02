@@ -50,7 +50,6 @@ vec2 satv(vec2 x)
     return v;
 }
 
-
 float max2(vec2 v)
 {
     float f = max(v.x, v.y);

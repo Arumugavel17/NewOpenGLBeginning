@@ -1,6 +1,6 @@
 #include <Application.hpp>
 
-Application::Application(float r, float g, float b, float a) {
+Application::Application(float r, float g, float b, float a,bool fullScreen) {
     
     if(!glfwInit()) {
         std::cout << " Failed to Initialize GLFW";

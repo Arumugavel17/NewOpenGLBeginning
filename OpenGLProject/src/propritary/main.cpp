@@ -66,8 +66,9 @@ int main() {
     std::string grid_vertex_shader_source = "shaders/grid_shaders/vertexshader.glsl";
     std::string grid_fragment_shader_source = "shaders/grid_shaders/fragmentshader.glsl";
 
-    std::string cube_vertex_shader_source = "shaders/model_shaders/vertexshader.glsl";
-    std::string cube_fragment_shader_source = "shaders/model_shaders/fragmentshader.glsl";
+    std::string backpack_vertex_shader_source = "shaders/model_shaders/vertexshader.glsl";
+    std::string backpack_fragment_shader_source = "shaders/model_shaders/fragmentshader.glsl";
+    std::string backpack_geometry_shader_source = "shaders/model_shaders/geometryshader.glsl";
 
     Program windowProgram;
     windowProgram.setup(window_vertex_shader_source, window_fragment_shader_source);
@@ -82,9 +83,9 @@ int main() {
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
 
-    Program cubeProgram;
-    cubeProgram.setup(cube_vertex_shader_source, cube_fragment_shader_source);
-    Model cubeModel("assets/Models/backpack/backpack.obj");
+    Program modelProgram;
+    modelProgram.setup(backpack_vertex_shader_source, backpack_fragment_shader_source, backpack_geometry_shader_source);
+    Model backpackModel("assets/Models/backpack/backpack.obj");
 
     glm::mat4 model_coord = glm::translate(glm::mat4(1.0f), glm::vec3(4.0f, 5.0f, 0.0f));
     glm::mat4 projection_coord;
@@ -117,12 +118,30 @@ int main() {
 
         frameBuffer.bind();
         applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        projection_coord = cameraInstance.get_projection(applicationInstance.getMode());
+        projection_coord = cameraInstance.get_projection();
         view_coord = cameraInstance.process_key_input(applicationInstance.get_window());
         skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
         
+        modelProgram.use();
+        modelProgram.set_uniform_1f("time", glfwGetTime());
+        modelProgram.set_uniform_4fv("outline_color", no_outline);
+        modelProgram.set_uniform_1f("outline", 0.0f);
+        modelProgram.set_uniform_mat_4fv("projection", projection_coord);
+        modelProgram.set_uniform_mat_4fv("view", view_coord);
+        modelProgram.set_uniform_mat_4fv("model", model_coord);
+        backpackModel.draw_model(modelProgram, "backpack", true);
+        modelProgram.stop_using();
+
+        windowProgram.use();
+        windowModel.use_VAO();
+        windowProgram.set_uniform_mat_4fv("projection", projection_coord);
+        windowProgram.set_uniform_mat_4fv("view", view_coord);
+        windowProgram.set_uniform_mat_4fv("model", window_position);
+        windowModel.draw_elements(6, 1, "window");
+        windowProgram.stop_using();
+
         gridProgram.use();
-        gridProgram.set_uniform_3fv("gCameraWorldPos",cameraInstance.get_camera_pos());
+        gridProgram.set_uniform_3fv("gCameraWorldPos", cameraInstance.get_camera_pos());
         //gridProgram.set_uniform_1f("gridCellSize", gridCellSize);
         //gridProgram.set_uniform_1f("gridSize", gridSize);
         gridProgram.set_uniform_mat_4fv("projection", projection_coord);
@@ -130,23 +149,6 @@ int main() {
         gridProgram.set_uniform_3fv("cameraPos", cameraInstance.get_camera_pos());
         applicationInstance.creat_grid(gridProgram);
         gridProgram.stop_using();
-        
-        windowProgram.use();
-        windowModel.use_VAO();
-        windowProgram.set_uniform_mat_4fv("projection", projection_coord);
-        windowProgram.set_uniform_mat_4fv("view", view_coord);
-        windowProgram.set_uniform_mat_4fv("model", window_position);
-        windowModel.draw_elements(6, 1,"window");
-        windowProgram.stop_using();
-
-        cubeProgram.use();
-        cubeProgram.set_uniform_4fv("outline_color", no_outline);
-        cubeProgram.set_uniform_1f("outline", 0.0f);
-        cubeProgram.set_uniform_mat_4fv("projection", projection_coord);
-        cubeProgram.set_uniform_mat_4fv("view", view_coord);
-        cubeProgram.set_uniform_mat_4fv("model", model_coord);
-        cubeModel.draw_model(cubeProgram, "backpack", true);
-        cubeProgram.stop_using();
 
         frameBuffer.un_bind();
 

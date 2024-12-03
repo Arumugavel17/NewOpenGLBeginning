@@ -18,7 +18,7 @@ public:
     static void process_mouse_scroll(GLFWwindow* window, double x_offset, double y_offset);
     static void process_mouse_input(GLFWwindow* window, double xpos, double ypos);
     glm::mat4 process_key_input(GLFWwindow* window);
-    glm::mat4 get_projection(const GLFWvidmode* mode);
+    glm::mat4 get_projection();
     glm::mat4 get_view();
 
     void process_mouse_input_impl(GLFWwindow* window, double xpos, double ypos);

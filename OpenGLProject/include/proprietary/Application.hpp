@@ -18,7 +18,7 @@
 
 class Application{
 public:
-    Application(float bg_r = 0.2f, float bg_g = 0.2f, float bg_b = 0.2f, float bg_a = 0.2f);
+    Application(float bg_r = 0.2f, float bg_g = 0.2f, float bg_b = 0.2f, float bg_a = 0.2f, bool fullScreen = false);
     ~Application();
     GLFWmonitor* get_monitor();
     GLFWwindow* get_window();

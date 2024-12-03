@@ -9,9 +9,12 @@ Program::~Program(){
     glDeleteProgram(ID);
 }
 
-void Program::setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
+void Program::setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) {
     parse_shader(GL_VERTEX_SHADER, vertexShaderPath);
     parse_shader(GL_FRAGMENT_SHADER, fragmentShaderPath);
+    if (!geometryShaderPath.empty()) {
+        parse_shader(GL_GEOMETRY_SHADER, geometryShaderPath);
+    }
     link();
 }
 

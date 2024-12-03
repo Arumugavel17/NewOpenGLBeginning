@@ -30,7 +30,7 @@ public:
 
     unsigned int get_id() const ;
     
-    void setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+    void setup(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath = "");
     void parse_shader(int shaderType, const std::string& path);
     void link() const;
     void use() const;

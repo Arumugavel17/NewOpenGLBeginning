@@ -100,8 +100,8 @@ void Camera::process_mouse_scroll(GLFWwindow* window, double xpos, double ypos) 
     }
 }
 
-glm::mat4 Camera::get_projection(const GLFWvidmode* mode){
-    return glm::perspective(glm::radians(zoom),(float) mode->width / (float) mode->height , 0.1f,100.0f);
+glm::mat4 Camera::get_projection(){
+    return glm::perspective(glm::radians(zoom),(float) screenWidth / (float) screenHeight , 0.1f,100.0f);
 }
 
 void Camera::set_mouse_x_y(double x , double y){

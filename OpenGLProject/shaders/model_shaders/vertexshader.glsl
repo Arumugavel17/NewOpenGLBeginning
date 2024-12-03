@@ -12,8 +12,14 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform float outline = 0.0f;
 
+out VS_OUT{
+	vec2 texCoords;
+}gs_out;
+
+
 void main()
 {
+    gs_out.texCoords = aTexCoords;
     TexCoords = aTexCoords;    
     Normal = mat3(transpose(inverse(model))) * aNormal;
     Position = model * vec4(aPos + (aNormal * outline),1.0);

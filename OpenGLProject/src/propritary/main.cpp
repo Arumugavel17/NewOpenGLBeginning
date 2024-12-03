@@ -44,8 +44,8 @@ int main() {
 
     double x = 0, y = 0;
 
-    Application applicationInstance(1.0, 1.0, 1.0, 1.0);
-    Camera cameraInstance(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
+    Application applicationInstance(1.0, 1.0, 1.0, 1.0,true);
+    Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
     applicationInstance.set_user(&cameraInstance);
 
     applicationInstance.set_mouse_callback(Camera::process_mouse_input);
@@ -78,7 +78,7 @@ int main() {
 
     Program fragmentProgram;
     fragmentProgram.setup(frame_buffer_vertex_shader_source, frame_buffer_fragment_shader_source);
-    FrameBuffer frameBuffer(applicationInstance.getMode()->width, applicationInstance.getMode()->height);
+    FrameBuffer frameBuffer(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
     Model windowModel(vertices_, indices, true);
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));

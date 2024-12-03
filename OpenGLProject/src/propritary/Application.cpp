@@ -1,7 +1,8 @@
 #include <Application.hpp>
 
-Application::Application(float r, float g, float b, float a,bool fullScreen) {
+Application::Application(float r, float g, float b, float a,bool fullScreen, int width, int height) {
     
+    this->fullScreen = fullScreen;
     if(!glfwInit()) {
         std::cout << " Failed to Initialize GLFW";
         return;
@@ -13,7 +14,17 @@ Application::Application(float r, float g, float b, float a,bool fullScreen) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL 
     monitor = glfwGetPrimaryMonitor();
     mode = glfwGetVideoMode(monitor);
-    window = glfwCreateWindow(mode->width, mode->height, "Tutorial 01", monitor, NULL);
+
+    if (this->fullScreen) {
+        this->screenWidth = mode->width;
+        this->screenHeight = mode->height;
+        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", monitor, NULL);
+    }
+    else {
+        this->screenWidth = width;
+        this->screenHeight = height;
+        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", monitor, NULL);
+    }
 
     if( window == NULL ) {
         std::cout <<  stderr << "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" ;
@@ -51,8 +62,17 @@ GLFWwindow* Application::get_window() {
     return window;
 }
 
-const GLFWvidmode* Application::getMode() {
+const GLFWvidmode* Application::get_mode() {
     return mode;
+}
+
+
+int Application::get_screen_width() {
+    return this->screenWidth;
+}
+
+int Application::get_screen_height() {
+    return this->screenHeight;
 }
 
 void Application::set_scroll_callback(void (*func)(GLFWwindow* window, double xpos, double ypos)) {

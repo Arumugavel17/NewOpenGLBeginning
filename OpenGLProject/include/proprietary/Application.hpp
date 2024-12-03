@@ -18,11 +18,11 @@
 
 class Application{
 public:
-    Application(float bg_r = 0.2f, float bg_g = 0.2f, float bg_b = 0.2f, float bg_a = 0.2f, bool fullScreen = false);
+    Application(float bg_r = 0.2f, float bg_g = 0.2f, float bg_b = 0.2f, float bg_a = 0.2f, bool fullScreen = false, int width = 800, int heigth = 600);
     ~Application();
     GLFWmonitor* get_monitor();
     GLFWwindow* get_window();
-    const GLFWvidmode* getMode();
+    const GLFWvidmode* get_mode();
     void set_user(void* pointer);
     void set_background(float r,float g, float b, float a);
     void set_scroll_callback(void (*func)(GLFWwindow* window, double xPos, double yPos));
@@ -36,6 +36,9 @@ public:
     void clear(float r, float g, float b, float w, unsigned int clearBuffer);
     void creat_grid(const Program& gridProgram);
     
+    int get_screen_width();
+    int get_screen_height();
+
     bool showCursor = true;
 
 private:
@@ -57,4 +60,7 @@ private:
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height){
         glViewport(0,0,width,height);
     }
+
+    int screenWidth, screenHeight;
+    bool fullScreen = false;
 };

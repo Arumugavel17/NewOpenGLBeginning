@@ -64,7 +64,7 @@ void Model::load_model(const std::string& path) {
         return;
     }
     else {
-        std::cout << "Model Load started";
+        std::cout << "Model Load started" << "\n";
     }
     // retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('/'));
@@ -72,7 +72,7 @@ void Model::load_model(const std::string& path) {
     // process ASSIMP's root node recursively
 
     process_node(scene->mRootNode, scene);
-    std::cout << "Model loaded";
+    std::cout << "Model loaded" << "\n";
 }
 
 void Model::process_node(const aiNode* node, const aiScene* scene) {
@@ -146,11 +146,19 @@ Mesh Model::process_mesh(const aiMesh* mesh, const aiScene* scene) {
     std::vector<Texture> specularMaps = load_material_textures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
+    std::vector<Texture> normalMaps = load_material_textures(material, aiTextureType_HEIGHT, "texture_normal");
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    
+    std::vector<Texture> heightMaps = load_material_textures(material, aiTextureType_AMBIENT, "texture_height");
+    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
     return Mesh(vertices, indices, textures);
 }
 
 std::vector<Texture> Model::load_material_textures(aiMaterial* mat, aiTextureType type, std::string typeName) {
     std::vector<Texture> textures;
+    int count = mat->GetTextureCount(type);
+    std::cout << "To Load Texture of type: " << type << " \n Total Count: " << count << "\n";
 
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -211,6 +219,8 @@ unsigned int Model::texture_from_file(const char* path, const std::string& direc
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
         stbi_image_free(data);
+
+        std::cout << "Texture Loaded: " << path << std::endl;
     }
     else
     {
@@ -221,11 +231,16 @@ unsigned int Model::texture_from_file(const char* path, const std::string& direc
     return textureID;
 }
 
-void Model::draw_model(const Program& program, std::string str ,bool draw_outline) {
+void Model::draw_model( const Program& program, bool draw_outline, int count) {
     
     if (!draw_outline) {
         for (int i = 0;i < meshes.size();i++) {
-            meshes[i].draw(program);
+            if (count == 1) {
+                meshes[i].draw(program);
+            }
+            else if (count > 1) {
+                meshes[i].draw(program, count);
+            }
         }
     }
     else {
@@ -236,16 +251,30 @@ void Model::draw_model(const Program& program, std::string str ,bool draw_outlin
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         for (int i = 0;i < meshes.size();i++) {
-            meshes[i].draw(program);
+            if (count == 1) {
+                meshes[i].draw(program);
+            }
+            else if (count > 1) {
+                meshes[i].draw(program, count);
+            }
         }
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glDisable(GL_DEPTH_TEST);
         program.set_uniform_4fv("outline_color", glm::vec4(1.0f)); 
         program.set_uniform_1f("outline", 0.01f);
         for (int i = 0;i < meshes.size();i++) {
-            meshes[i].draw(program);
+            if (count == 0) {
+                meshes[i].draw(program);
+            }
+            else if (count > 0) {
+                meshes[i].draw(program, count);
+            }
         }
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
     }
+}
+
+std::vector<Mesh>* Model::get_mesh() {
+    return &meshes;
 }

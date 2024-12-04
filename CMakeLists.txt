@@ -19,7 +19,7 @@ file(GLOB VENDOR_SOURCES "${VENDOR_SOURCES_LOCATION}/imgui/*.cpp" "${VENDOR_SOUR
 add_executable(OpenGLProject ${PROPRITARY_SOURCES} ${VENDOR_SOURCES})
 
 # Specify the path to the GLFW library
-set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/OpenGLProject/lib/glfw3.lib")
+set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/OpenGLProject/lib/glfw3.lib") 
 
 # Link the GLFW and OpenGL libraries
 target_link_libraries(OpenGLProject PRIVATE OpenGL32 ${GLFW_LIBRARIES})

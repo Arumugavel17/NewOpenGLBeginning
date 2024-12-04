@@ -23,7 +23,7 @@ Application::Application(float r, float g, float b, float a,bool fullScreen, int
     else {
         this->screenWidth = width;
         this->screenHeight = height;
-        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", monitor, NULL);
+        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", NULL, NULL);
     }
 
     if( window == NULL ) {
@@ -113,7 +113,7 @@ void Application::enable(const std::vector<unsigned int>& toEnable) {
 
 void Application::clear(float r, float g, float b, float w, unsigned int clearBuffer) {
     glClear(clearBuffer);
-    glClearColor(r, g, b, w);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 }
 
 void Application::blend_function(unsigned int sfactor,unsigned int dfactor) {

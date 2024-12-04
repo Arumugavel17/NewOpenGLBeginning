@@ -7,6 +7,8 @@ struct Vertex{
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoordinates;
+  /*  glm::vec3 Tangent;
+    glm::vec3 Bitangent;*/
 };
 
 struct Texture{
@@ -23,8 +25,8 @@ class Mesh {
         std::vector<Texture> textures;
 
         Mesh( std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        void draw(const Program &shader);
-
+        void draw(const Program &shader, int count = 1);
+        unsigned int get_VAO();
     private:
         // render data
         unsigned int VAO, VBO, EBO;

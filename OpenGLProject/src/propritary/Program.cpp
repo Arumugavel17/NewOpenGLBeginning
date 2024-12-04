@@ -67,6 +67,7 @@ void Program::parse_shader(GLint shader_type,const std::string &path){
 }
 
 void Program::set_uniform_1i(const std::string& unifrom_name, int value) const {
+
     int currently_bound_program;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currently_bound_program);
     if(currently_bound_program != ID){

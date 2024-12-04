@@ -68,7 +68,7 @@ public:
     void process_node(const aiNode* node, const aiScene* scene);
     Mesh process_mesh(const aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> load_material_textures(aiMaterial* mat, aiTextureType type, std::string typeName);
-    void draw_model(const Program &program,std::string str,bool draw_outline = false);
+    void draw_model(const Program &program, bool draw_outline = false, int count = 1);
     
     void use_VAO();
     void clear_VAO(std::string str);
@@ -78,6 +78,7 @@ public:
     void draw_triangles(int start_index, int num_vertex, std::string str);
     void draw_elements(int count, int offset,std::string str);
     
+    std::vector<Mesh>* get_mesh();
     ~Model();
 
 private:

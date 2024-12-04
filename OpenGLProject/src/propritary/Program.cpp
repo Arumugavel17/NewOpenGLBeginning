@@ -167,6 +167,10 @@ void Program::add_texture(unsigned int channel, unsigned int textureID,bool over
 
     glActiveTexture(channel);
     glBindTexture(GL_TEXTURE_2D, textureID);
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cerr << "Error binding texture: " << error << std::endl;
+    }
 }
 
 

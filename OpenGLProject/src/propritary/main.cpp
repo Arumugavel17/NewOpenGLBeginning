@@ -61,22 +61,9 @@ int main() {
 
     std::vector<unsigned int> EnableList = {
         GL_DEPTH_TEST,
-        GL_BLEND
+        GL_BLEND,
+        GL_MULTISAMPLE
     };
-
-    Application applicationInstance(1.0, 1.0, 1.0, 1.0,true);
-    Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
-    applicationInstance.set_user(&cameraInstance);
-
-    applicationInstance.set_mouse_callback(Camera::process_mouse_input);
-    applicationInstance.set_scroll_callback(Camera::process_mouse_scroll);
-
-    applicationInstance.get_cursor_position(&x, &y);
-    cameraInstance.process_mouse_input_impl(applicationInstance.get_window(), x, y);
-    
-    applicationInstance.enable(EnableList);
-    applicationInstance.blend_function(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    applicationInstance.enable_imgui();
 
     std::string frame_buffer_vertex_shader_source = "shaders/frame_buffer_shaders/vertexshader.glsl";
     std::string frame_buffer_fragment_shader_source = "shaders/frame_buffer_shaders/fragmentshader.glsl";
@@ -96,7 +83,21 @@ int main() {
     std::string backpack_vertex_shader_source = "shaders/model_shaders/vertexshader.glsl";
     std::string backpack_fragment_shader_source = "shaders/model_shaders/fragmentshader.glsl";
     //std::string backpack_geometry_shader_source = "shaders/model_shaders/geometryshader.glsl";
+
+    Application applicationInstance(1.0, 1.0, 1.0, 1.0);
+    Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
+    applicationInstance.set_user(&cameraInstance);
+
+    applicationInstance.set_mouse_callback(Camera::process_mouse_input);
+    applicationInstance.set_scroll_callback(Camera::process_mouse_scroll);
+
+    applicationInstance.get_cursor_position(&x, &y);
+    cameraInstance.process_mouse_input_impl(applicationInstance.get_window(), x, y);
     
+    applicationInstance.enable(EnableList);
+    applicationInstance.blend_function(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    applicationInstance.enable_imgui();
+
     Skybox skyBox;
 
     Program gridProgram;
@@ -257,7 +258,7 @@ int main() {
 
         fragmentProgram.use();
         //windowModel.use_VAO();
-        windowProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
+        fragmentProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
         windowModel.draw_elements(6, 1,"frame window");
     }
     return 1;

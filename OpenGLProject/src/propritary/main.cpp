@@ -27,12 +27,20 @@
 
 int main() {
 
-    std::array<float, 20> vertices_ = {
-        // Positions         // Texture Coords
-        -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, // Top Left
-        -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, // Bottom Left
-         1.0f, -1.0f,  0.0f,  1.0f, 0.0f, // Bottom Right
-         1.0f,  1.0f,  0.0f,  1.0f, 1.0f  // Top Right
+    std::array<float, 32> vertices_ = {
+        // Positions            // Texture Coords   // Normals
+        -1.0f,  1.0f,  0.0f,    0.0f, 1.0f,         // Top Left
+        -1.0f, -1.0f,  0.0f,    0.0f, 0.0f,         // Bottom Left
+         1.0f, -1.0f,  0.0f,    1.0f, 0.0f,         // Bottom Right
+         1.0f,  1.0f,  0.0f,    1.0f, 1.0f          // Top Right
+    };
+
+    std::array<float, 32> vertices_floor = {
+        // Positions            // Normals          // Texture Coords   
+        -1.0f,  1.0f, -1.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,         // Top Left
+        -1.0f,  1.0f,  1.0f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,         // Bottom Left
+         1.0f,  1.0f,  1.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,         // Bottom Right
+         1.0f,  1.0f, -1.0f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f          // Top Right
     };
 
     std::array<unsigned int, 36> indices = {
@@ -46,11 +54,8 @@ int main() {
     glm::vec4 outline = glm::vec4(1.0f);
     glm::vec4 no_outline = glm::vec4(0.0f);
 
-    glm::mat4 back_pack_model_coord = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 5.0f, 0.0f));
-    glm::mat4 planet_model_coord = glm::translate(glm::mat4(1.0f), glm::vec3 ( 0.0f, 0.0f, 0.0f));
-    glm::mat4 rock_model_coord = glm::translate(glm::mat4(1.0f), glm::vec3( 0.0f, 0.0f, 0.0f));
-
-
+    glm::mat4 model_coord = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    //model_coord = glm::translate(model_coord, glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 projection_coord;
     glm::mat4 view_coord;
 
@@ -63,6 +68,7 @@ int main() {
         GL_BLEND,
         GL_MULTISAMPLE
     };
+    std::string floorTexture = "assets/textures/wood.png";
 
     std::string frame_buffer_vertex_shader_source = "shaders/frame_buffer_shaders/vertexshader.glsl";
     std::string frame_buffer_fragment_shader_source = "shaders/frame_buffer_shaders/fragmentshader.glsl";
@@ -72,6 +78,9 @@ int main() {
 
     std::string grid_vertex_shader_source = "shaders/grid_shaders/vertexshader.glsl";
     std::string grid_fragment_shader_source = "shaders/grid_shaders/fragmentshader.glsl";
+
+    std::string floor_vertex_shader_source = "shaders/floor_shaders/vertexshader.glsl";
+    std::string floor_fragment_shader_source = "shaders/floor_shaders/fragmentshader.glsl";
 
     Application applicationInstance(1.0, 1.0, 1.0, 1.0);
     Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
@@ -95,9 +104,22 @@ int main() {
     Program fragmentProgram;
     fragmentProgram.setup(frame_buffer_vertex_shader_source, frame_buffer_fragment_shader_source);
 
+    Program floorProgram;
+    floorProgram.setup(floor_vertex_shader_source, floor_fragment_shader_source);
+    floorProgram.add_texture(floorTexture, GL_RGB, GL_RGB, GL_TEXTURE0);
+    floorProgram.use();
+    floorProgram.set_uniform_1i("floorTexture", 0);
+    floorProgram.stop_using();
+    
     Model windowModel(vertices_, indices, true);
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
+
+    Model floorModel(vertices_floor, indices, true);
+    floorModel.setup(0, 3, GL_FALSE, 8, (void*)0);
+    floorModel.setup(1, 3, GL_FALSE, 8, (void*)(3 * sizeof(float)));
+    floorModel.setup(2, 2, GL_FALSE, 8, (void*)(6 * sizeof(float)));
+
 
     FrameBuffer frameBuffer(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
 
@@ -108,6 +130,14 @@ int main() {
         projection_coord = cameraInstance.get_projection();
         view_coord = cameraInstance.process_key_input(applicationInstance.get_window());
         //skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
+
+        floorProgram.use();
+        floorProgram.set_uniform_mat_4fv("projection", projection_coord);
+        floorProgram.set_uniform_mat_4fv("view", view_coord);
+        floorProgram.set_uniform_3fv("viewPos", cameraInstance.get_camera_pos());
+        floorProgram.set_uniform_mat_4fv("model", model_coord);
+        floorModel.draw_elements(6, 1, "floor");
+        floorProgram.stop_using();
         
         gridProgram.use();
         gridProgram.set_uniform_3fv("gCameraWorldPos", cameraInstance.get_camera_pos());

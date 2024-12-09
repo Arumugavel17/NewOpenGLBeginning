@@ -19,6 +19,7 @@ void Model::draw_triangles(int start_index, int num_vertex,std::string str) {
 }
 
 void Model::draw_elements(int count, int offset, std::string str) {
+    
     bool valbound = false;
     if (VAO != 0) {
         use_VAO();

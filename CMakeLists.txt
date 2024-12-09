@@ -16,7 +16,7 @@ file(GLOB PROPRITARY_SOURCES "OpenGLProject/src/propritary/*.cpp" "OpenGLProject
 file(GLOB VENDOR_SOURCES "${VENDOR_SOURCES_LOCATION}/imgui/*.cpp" "${VENDOR_SOURCES_LOCATION}/imgui/*.c")
 
 # Create the executable
-add_executable(OpenGLProject ${PROPRITARY_SOURCES} ${VENDOR_SOURCES})
+add_executable(OpenGLProject ${PROPRITARY_SOURCES} ${VENDOR_SOURCES}) 
 
 # Specify the path to the GLFW library
 set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/OpenGLProject/lib/glfw3.lib") 
@@ -29,7 +29,7 @@ set(ASSIMP_LIBRARY_DIR "C:/Users/arumu/source/repos/NewOpenGLBeginning/OpenGLPro
 set(ASSIMP_LIBRARY "${ASSIMP_LIBRARY_DIR}/lib/Debug/assimp-vc143-mtd.lib")
 target_link_libraries(OpenGLProject PRIVATE ${ASSIMP_LIBRARY})
 
-# Post-build command to copy Assimp DLL
+# Post-build command to copy Assimp DLL 
 add_custom_command(TARGET OpenGLProject POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     ${ASSIMP_LIBRARY_DIR}/bin/Debug/assimp-vc143-mtd.dll

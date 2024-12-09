@@ -27,6 +27,9 @@ public:
     void set_background(float r,float g, float b, float a);
     void set_scroll_callback(void (*func)(GLFWwindow* window, double xPos, double yPos));
     void set_mouse_callback(void (*func)(GLFWwindow* window, double xOffset, double yOffset));
+    void set_key_call_back(void (*func)(GLFWwindow* window, int key, int scancode, int action, int mods));
+    void set_mouse_button_callback(void (*func)(GLFWwindow* window, int button, int action, int mods));
+
     void enable_imgui();
     void get_cursor_position(double* x,double* y);
     
@@ -49,6 +52,12 @@ private:
 
     typedef void (*CursorPosCallback)(GLFWwindow* window, double x_offset, double y_offset);
     CursorPosCallback cursorCallback;
+
+    typedef void (*KeyCallBack)(GLFWwindow* window, int key, int scancode, int action, int mods);
+    KeyCallBack keyCallback;
+
+    typedef void (*MouseButtonCallback)(GLFWwindow* window, int button, int action, int mods);
+    MouseButtonCallback mouseButtonCallback;
 
     GLFWmonitor* monitor;    
     GLFWwindow* window;

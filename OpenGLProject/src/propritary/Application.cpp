@@ -33,7 +33,6 @@ Application::Application(float r, float g, float b, float a,bool fullScreen, int
     }
 
     glfwMakeContextCurrent(window);
-
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
@@ -43,10 +42,11 @@ Application::Application(float r, float g, float b, float a,bool fullScreen, int
     bg_g = g;
     bg_b = b;
     bg_a = a;
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);  
     glGenVertexArrays(1, &VAO);
-
+    glfwSetWindowShouldClose(window, GL_FALSE);
 }
 
 void Application::set_user(void* pointer) {
@@ -76,14 +76,28 @@ int Application::get_screen_height() {
 }
 
 void Application::set_scroll_callback(void (*func)(GLFWwindow* window, double xpos, double ypos)) {
-    scrollCallback = func;
-    glfwSetScrollCallback(window, scrollCallback);
+    this->scrollCallback = func;
+    glfwSetScrollCallback(window, this->scrollCallback);
 }
 
 void Application::set_mouse_callback(void (*func)(GLFWwindow* window, double x_offset, double y_offset)) {
-    cursorCallback = func;
-    glfwSetCursorPosCallback(window, cursorCallback);
+    this->cursorCallback = func;
+    glfwSetCursorPosCallback(window, this->cursorCallback);
 }
+
+
+void Application::set_key_call_back(void (*func)(GLFWwindow* window, int key, int scancode, int action, int mods)) {
+   
+    this->keyCallback = func;
+    glfwSetKeyCallback(window, this->keyCallback);
+}
+
+void Application::set_mouse_button_callback(void (*func)(GLFWwindow* window, int button, int action, int mods)) {
+
+    this->mouseButtonCallback = func;
+    glfwSetMouseButtonCallback(window, this->mouseButtonCallback);
+}
+
 
 void Application::get_cursor_position(double* x,double* y) {
     glfwGetCursorPos(window,x,y);
@@ -93,7 +107,7 @@ bool Application::main_loop() {
     glfwSwapBuffers(get_window());
     glfwPollEvents();
     clear(bg_r, bg_g, bg_b, bg_a, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    return true;
+    return !glfwWindowShouldClose(window);
 }
 
 Application::~Application() {

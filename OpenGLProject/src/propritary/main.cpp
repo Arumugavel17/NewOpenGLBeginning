@@ -152,8 +152,8 @@ int main() {
     std::string primitive_vertex_shader_source = "shaders/primitive_shaders/vertexshader.glsl";
     std::string primitive_fragment_shader_source = "shaders/primitive_shaders/fragmentshader.glsl";
 
-    std::string shadow_vertex_shader_source = "shaders/shadow_shaders/vertexshader.glsl";
-    std::string shadow_fragment_shader_source = "shaders/shadow_shaders/fragmentshader.glsl";
+    std::string blinn_phong_vertex_shader_source = "shaders/blinn_phong_shaders/vertexshader.glsl";
+    std::string blinn_phong_fragment_shader_source = "shaders/blinn_phong_shaders/fragmentshader.glsl";
 
     Application applicationInstance(1.0, 1.0, 1.0, 1.0, true);
     Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
@@ -185,12 +185,12 @@ int main() {
     Program primitiveProgram;
     primitiveProgram.setup(primitive_vertex_shader_source, primitive_fragment_shader_source);
 
-    Program shadowProgram;
-    shadowProgram.setup(shadow_vertex_shader_source, shadow_fragment_shader_source);
-    shadowProgram.add_texture(floorTexture, GL_RGB, GL_RGB, GL_TEXTURE0);
-    shadowProgram.use();
-    shadowProgram.set_uniform_1i("floorTexture", 0);
-    shadowProgram.stop_using();
+    Program blinnPhongProgram;
+    blinnPhongProgram.setup(blinn_phong_vertex_shader_source, blinn_phong_fragment_shader_source);
+    blinnPhongProgram.add_texture(floorTexture, GL_RGB, GL_RGB, GL_TEXTURE0);
+    blinnPhongProgram.use();
+    blinnPhongProgram.set_uniform_1i("floorTexture", 0);
+    blinnPhongProgram.stop_using();
 
     Model windowModel(vertices_window, indices_plane, true);
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
@@ -220,19 +220,18 @@ int main() {
         projection_coord = cameraInstance.get_projection();
         view_coord = cameraInstance.camera_input(applicationInstance.get_window());
         //skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
-
-        shadowProgram.use();
-        shadowProgram.set_uniform_mat_4fv("projection", projection_coord);
-        shadowProgram.set_uniform_mat_4fv("view", view_coord);
-        shadowProgram.set_uniform_3fv("viewPos", cameraInstance.get_camera_pos());
-        shadowProgram.set_uniform_3fv("lightPos", lightPos); 
-        shadowProgram.set_uniform_mat_4fv("model", model_coord);
+        blinnPhongProgram.use();
+        blinnPhongProgram.set_uniform_mat_4fv("projection", projection_coord);
+        blinnPhongProgram.set_uniform_mat_4fv("view", view_coord);
+        blinnPhongProgram.set_uniform_3fv("viewPos", cameraInstance.get_camera_pos());
+        blinnPhongProgram.set_uniform_3fv("lightPos", lightPos); 
+        blinnPhongProgram.set_uniform_mat_4fv("model", model_coord);
         cubeModel.draw_elements(36, 0, "cube");
-        shadowProgram.set_uniform_mat_4fv("model", cube_model_coord);
+        blinnPhongProgram.set_uniform_mat_4fv("model", cube_model_coord);
         cubeModel.draw_elements(36, 0,"cube");
         //shadowProgram.set_uniform_mat_4fv("model", floor_model_coord);
         //floorModel.draw_elements(6, 0, "plane");
-        shadowProgram.stop_using();
+        blinnPhongProgram.stop_using();
 
         primitiveProgram.use();
         primitiveProgram.set_uniform_mat_4fv("projection", projection_coord);

@@ -22,7 +22,7 @@ add_executable(OpenGLProject ${PROPRITARY_SOURCES} ${VENDOR_SOURCES})
 set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/OpenGLProject/lib/glfw3.lib") 
 
 # Link the GLFW and OpenGL libraries
-target_link_libraries(OpenGLProject PRIVATE OpenGL32 ${GLFW_LIBRARIES})
+target_link_libraries(OpenGLProject PRIVATE OpenGL32 ${GLFW_LIBRARIES}) 
 
 # Link Assimp library
 set(ASSIMP_LIBRARY_DIR "C:/Users/arumu/source/repos/NewOpenGLBeginning/OpenGLProject/include/assimp/build")

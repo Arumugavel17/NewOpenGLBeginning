@@ -207,7 +207,7 @@ int main() {
     cubeModel.setup(2, 2, GL_FALSE, 8, (void*)(6 * sizeof(float)));
     
     Model r_cubeModel("assets/Models/untitled.obj");
-
+    std::cout << "\napplicationInstance.get_screen_width() : " << applicationInstance.get_screen_width() << "\napplicationInstance.get_screen_height(): " << applicationInstance.get_screen_height() << "\n";
     FrameBuffer frameBuffer(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
 
     glm::mat4 model_coord(1.0f);

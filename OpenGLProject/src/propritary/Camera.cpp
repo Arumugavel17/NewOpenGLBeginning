@@ -48,8 +48,11 @@ glm::mat4 Camera::camera_input(GLFWwindow* window){
     return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
-glm::mat4 Camera::get_projection(){
-    return glm::perspective(glm::radians(zoom),(float) screenWidth / (float) screenHeight , 0.1f,100.0f);
+glm::mat4 Camera::get_projection(bool perspectiveProjection){
+    if (perspectiveProjection) {
+        return glm::perspective(glm::radians(zoom),(float) screenWidth / (float) screenHeight , nearPlane, farPlane);
+    }
+    return glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 }
 
 void Camera::set_mouse_x_y(double x , double y){

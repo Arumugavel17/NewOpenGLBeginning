@@ -16,14 +16,20 @@ class FrameBuffer {
 public:
 	FrameBuffer(unsigned int width, unsigned int height,unsigned int samplePoints = 1);
 	~FrameBuffer();
-	void bind();
+	void bind(bool normal = true);
 	void un_bind();
-	unsigned int get_tex_color_buffer();
-	void rescale_framebuffer(int width,int height);
+	unsigned int get_texture(bool normal = true);
+	
+	void normalFrameBuffer(unsigned int width, unsigned int height, unsigned int samplePoints);
+	void shadowFrameBuffer();
+
 private:
-	unsigned int textureType;
-	unsigned int samplePoints;
-	unsigned int id;
-	unsigned int texColorBuffer;
-	unsigned int rbo;
+	unsigned int normal_samplePoints;
+	unsigned int normal_id;
+	unsigned int normal_texColorBuffer;
+	unsigned int normal_rbo;
+
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	unsigned int shadow_depthMapFBO;
+	unsigned int shadow_depthMap;
 };

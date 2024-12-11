@@ -23,6 +23,7 @@
 #include <Model.hpp>
 #include <Application.hpp>
 #include <FrameBuffer.hpp>
+#include <Shadow.hpp>
 #include <Skybox.hpp>
 
 int main() {
@@ -97,6 +98,13 @@ int main() {
         // Positions            // Texture Coords   // Normals
         -1.0f,  1.0f,  0.0f,    0.0f, 1.0f,         // Top Left
         -1.0f, -1.0f,  0.0f,    0.0f, 0.0f,         // Bottom Left
+         0.05f, -1.0f,  0.0f,    1.0f, 0.0f,         // Bottom Right
+         0.05f,  1.0f,  0.0f,    1.0f, 1.0f          // Top Right
+    };
+    std::array<float, 32> vertices_window_2 = {
+        // Positions            // Texture Coords   // Normals
+        -0.1f,  1.0f,  0.0f,    0.0f, 1.0f,         // Top Left
+        -0.1f, -1.0f,  0.0f,    0.0f, 0.0f,         // Bottom Left
          1.0f, -1.0f,  0.0f,    1.0f, 0.0f,         // Bottom Right
          1.0f,  1.0f,  0.0f,    1.0f, 1.0f          // Top Right
     };
@@ -116,17 +124,20 @@ int main() {
     };
 
     double cursor_x = 0, cursor_y = 0;
-    glm::vec3 lightPos(0.0f, 1.0f, 0.0f);
+    glm::vec3 lightPos(10.0f);
     glm::vec3 scale(0.5f);
     glm::vec4 outline(1.0f);
     glm::vec4 no_outline(0.0f);
-
+    glm::mat4 model_coord(1.0f);
     glm::mat4 floor_model_coord = glm::mat4(1.0f);
     glm::mat4 cube_model_coord(1.0f);
     cube_model_coord = glm::scale(cube_model_coord, glm::vec3(5.0f));
     //model_coord = glm::translate(model_coord, glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 projection_coord;
     glm::mat4 view_coord;
+
+    glm::mat4 light_projection_coord;
+    glm::mat4 light_view_coord;
 
     float gridSize = 50.0f;
     float gridCellSize = 0.1f;
@@ -155,6 +166,9 @@ int main() {
     std::string blinn_phong_vertex_shader_source = "shaders/blinn_phong_shaders/vertexshader.glsl";
     std::string blinn_phong_fragment_shader_source = "shaders/blinn_phong_shaders/fragmentshader.glsl";
 
+    std::string shadow_vertex_shader_source = "shaders/shadow_shaders/vertexshader.glsl";
+    std::string shadow_fragment_shader_source = "shaders/shadow_shaders/fragmentshader.glsl";
+
     Application applicationInstance(1.0, 1.0, 1.0, 1.0, true);
     Camera cameraInstance(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
     applicationInstance.set_user(&cameraInstance);
@@ -173,14 +187,14 @@ int main() {
 
     Skybox skyBox;
 
-    Program cubeProgram;
-    cubeProgram.setup(grid_vertex_shader_source, grid_fragment_shader_source);
-
     Program gridProgram;
     gridProgram.setup(grid_vertex_shader_source, grid_fragment_shader_source);
 
-    Program fragmentProgram;
-    fragmentProgram.setup(frame_buffer_vertex_shader_source, frame_buffer_fragment_shader_source);
+    Program frameProgram;
+    frameProgram.setup(frame_buffer_vertex_shader_source, frame_buffer_fragment_shader_source);
+
+    Program shadowProgram;
+    shadowProgram.setup(shadow_vertex_shader_source, shadow_fragment_shader_source);  
 
     Program primitiveProgram;
     primitiveProgram.setup(primitive_vertex_shader_source, primitive_fragment_shader_source);
@@ -196,6 +210,10 @@ int main() {
     windowModel.setup(0, 3, GL_FALSE, 5, (void*)0);
     windowModel.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
 
+    Model windowModel_2(vertices_window_2, indices_plane, true);
+    windowModel_2.setup(0, 3, GL_FALSE, 5, (void*)0);
+    windowModel_2.setup(1, 2, GL_FALSE, 5, (void*)(3 * sizeof(float)));
+
     Model floorModel(vertices_floor, indices_plane, true);
     floorModel.setup(0, 3, GL_FALSE, 8, (void*)0);
     floorModel.setup(1, 3, GL_FALSE, 8, (void*)(3 * sizeof(float)));
@@ -207,30 +225,31 @@ int main() {
     cubeModel.setup(2, 2, GL_FALSE, 8, (void*)(6 * sizeof(float)));
     
     Model r_cubeModel("assets/Models/untitled.obj");
-    std::cout << "\napplicationInstance.get_screen_width() : " << applicationInstance.get_screen_width() << "\napplicationInstance.get_screen_height(): " << applicationInstance.get_screen_height() << "\n";
     FrameBuffer frameBuffer(applicationInstance.get_screen_width(), applicationInstance.get_screen_height());
 
-    glm::mat4 model_coord(1.0f);
-    glm::mat4 temp(1.0f);
-    glm::mat4 temp_1(1.0f);
+    bool normal = true;
     while (applicationInstance.main_loop()) {
-
-        frameBuffer.bind();
+        
+        frameBuffer.bind(normal);
         applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        projection_coord = cameraInstance.get_projection();
-        view_coord = cameraInstance.camera_input(applicationInstance.get_window());
-        //skyBox.draw_skybox(projection_coord, glm::mat4(glm::mat3(view_coord)));
+        projection_coord = cameraInstance.get_projection(false);
+        //view_coord = cameraInstance.camera_input(applicationInstance.get_window());
+        view_coord = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        light_projection_coord = cameraInstance.get_projection(false);
+        light_view_coord = glm::lookAt(lightPos, glm::vec3( 0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, 1.0f, 0.0f));
+
         blinnPhongProgram.use();
         blinnPhongProgram.set_uniform_mat_4fv("projection", projection_coord);
         blinnPhongProgram.set_uniform_mat_4fv("view", view_coord);
         blinnPhongProgram.set_uniform_3fv("viewPos", cameraInstance.get_camera_pos());
-        blinnPhongProgram.set_uniform_3fv("lightPos", lightPos); 
+        blinnPhongProgram.set_uniform_3fv("lightPos", lightPos);
         blinnPhongProgram.set_uniform_mat_4fv("model", model_coord);
         cubeModel.draw_elements(36, 0, "cube");
         blinnPhongProgram.set_uniform_mat_4fv("model", cube_model_coord);
-        cubeModel.draw_elements(36, 0,"cube");
-        //shadowProgram.set_uniform_mat_4fv("model", floor_model_coord);
-        //floorModel.draw_elements(6, 0, "plane");
+        cubeModel.draw_elements(36, 0, "cube");
+        blinnPhongProgram.set_uniform_mat_4fv("model", floor_model_coord);
+        floorModel.draw_elements(6, 0, "plane");
         blinnPhongProgram.stop_using();
 
         primitiveProgram.use();
@@ -238,7 +257,7 @@ int main() {
         primitiveProgram.set_uniform_mat_4fv("view", view_coord);
         primitiveProgram.set_uniform_mat_4fv("model", model_coord);
         primitiveProgram.set_uniform_3fv("color", glm::vec3(7.0f, 0.0f, 0.0f));
-        primitiveProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f),glm::vec3(7.0f,0.0f,0.0f)));
+        primitiveProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.0f, 0.0f)));
         cubeModel.draw_elements(36, 0, "cube");
         primitiveProgram.set_uniform_3fv("color", glm::vec3(0.0f, 7.0f, 0.0f));
         primitiveProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f)));
@@ -247,14 +266,6 @@ int main() {
         primitiveProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 7.0f)));
         cubeModel.draw_elements(36, 0, "cube");
         primitiveProgram.stop_using();
-
-        cubeProgram.use();
-        cubeProgram.set_uniform_mat_4fv("projection", projection_coord);
-        cubeProgram.set_uniform_mat_4fv("view", view_coord);
-        cubeProgram.set_uniform_3fv("viewPos", cameraInstance.get_camera_pos());
-        cubeProgram.set_uniform_mat_4fv("model", floor_model_coord);
-        floorModel.draw_elements(6, 0, "plane");
-        cubeProgram.stop_using();
 
         gridProgram.use();
         gridProgram.set_uniform_3fv("gCameraWorldPos", cameraInstance.get_camera_pos());
@@ -266,10 +277,39 @@ int main() {
 
         frameBuffer.un_bind();
 
-        fragmentProgram.use();
-        fragmentProgram.add_texture(GL_TEXTURE0, frameBuffer.get_tex_color_buffer(), true);
+        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
+        frameProgram.use();
+        frameProgram.add_texture(GL_TEXTURE0, frameBuffer.get_texture(normal), true);
+        frameProgram.set_uniform_1i("shadow", 0);
         windowModel.draw_elements(6, 0, "frame window");
-        // Start ImGui frame
+        
+        frameBuffer.bind(!normal);
+
+        applicationInstance.clear(0.2f, 0.2f, 0.2f, 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        shadowProgram.use();
+        shadowProgram.set_uniform_mat_4fv("projection", projection_coord);
+        shadowProgram.set_uniform_mat_4fv("view", view_coord);
+        shadowProgram.set_uniform_mat_4fv("model", model_coord);
+        cubeModel.draw_elements(36, 0, "cube");
+        shadowProgram.set_uniform_mat_4fv("model", cube_model_coord);
+        cubeModel.draw_elements(36, 0, "cube");
+        shadowProgram.set_uniform_mat_4fv("model", glm::scale(floor_model_coord,glm::vec3(50.0f)));
+        floorModel.draw_elements(6, 0, "plane");
+        shadowProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(7.0f, 0.0f, 0.0f)));
+        cubeModel.draw_elements(36, 0, "cube");
+        shadowProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 7.0f, 0.0f)));
+        cubeModel.draw_elements(36, 0, "cube");
+        shadowProgram.set_uniform_mat_4fv("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 7.0f)));
+        cubeModel.draw_elements(36, 0, "cube");
+        shadowProgram.stop_using();
+
+        frameBuffer.un_bind();
+        frameProgram.use();
+        frameProgram.add_texture(GL_TEXTURE0, frameBuffer.get_texture(!normal), true);
+        frameProgram.set_uniform_1i("shadow", 1);
+        windowModel_2.draw_elements(6, 0, "frame window");
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -316,6 +356,14 @@ int main() {
         ImGui::Text("Current Values: X=%.3f, Y=%.3f, Z=%.3f", scale.x, scale.y, scale.z);
         ImGui::End();
 
+        ImGui::SetNextWindowPos(ImVec2(750, 50), ImGuiCond_Once); // Position of the second panel
+        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_Once); // Size of the second panel
+
+        ImGui::Begin("Shadow");  // Unique name for the second panel
+        ImGui::Text("Show Shadow:");
+        ImGui::Checkbox("Enable Feature", &normal);
+        ImGui::End();
+
         // Combine ImGui checks
         mousePressed = (glfwGetMouseButton(applicationInstance.get_window(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
         imguiAnyWindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow); // Check if any ImGui window is hovered
@@ -334,6 +382,9 @@ int main() {
         // Render ImGui
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    
+        glfwSwapBuffers( applicationInstance.get_window());
+        glfwPollEvents();
     }
     return 1;
 }

@@ -125,7 +125,7 @@ void Program::set_uniform_mat_4fv(const std::string& uniform_name,const glm::mat
     int currently_bound_program;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currently_bound_program);
     if(currently_bound_program != ID){
-        throw std::runtime_error("Currently bound Program ID does not match Program ID this object is responsible for !");
+        throw std::runtime_error("Currently bound Program ID does not match Program ID this object is responsible for !" );
         return;
     }
     glUniformMatrix4fv(glGetUniformLocation(ID,uniform_name.c_str()), 1,GL_FALSE,glm::value_ptr(mat4));
@@ -154,7 +154,7 @@ void Program::add_texture(const std::string& path, int file_format, int data_for
     stbi_image_free(data);
 }
 
-void Program::add_texture(unsigned int channel, unsigned int textureID,bool overrideTexture) {
+void Program::add_texture(unsigned int channel, unsigned int textureID, bool overrideTexture) {
 
     if (!overrideTexture) {
         for (const auto& pair : textures) {

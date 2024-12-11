@@ -7,10 +7,10 @@ Application::Application(float r, float g, float b, float a,bool fullScreen, int
         std::cout << " Failed to Initialize GLFW";
         return;
     }
-
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // We want OpenGL 3.4
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL 
     monitor = glfwGetPrimaryMonitor();
     mode = glfwGetVideoMode(monitor);
@@ -18,7 +18,8 @@ Application::Application(float r, float g, float b, float a,bool fullScreen, int
     if (this->fullScreen) {
         this->screenWidth = mode->width;
         this->screenHeight = mode->height;
-        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", monitor, NULL);
+        window = glfwCreateWindow(this->screenWidth, this->screenHeight, "Tutorial 01", NULL, NULL);
+        glfwSetWindowMonitor(window, nullptr, 0, 0, this->screenWidth, this->screenHeight, GLFW_DONT_CARE);
     }
     else {
         this->screenWidth = width;
@@ -104,9 +105,6 @@ void Application::get_cursor_position(double* x,double* y) {
 }
 
 bool Application::main_loop() {
-    glfwSwapBuffers(get_window());
-    glfwPollEvents();
-    clear(bg_r, bg_g, bg_b, bg_a, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     return !glfwWindowShouldClose(window);
 }
 

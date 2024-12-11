@@ -14,13 +14,14 @@
 
 class Shadow {
 public:
-	Shadow(unsigned int width, unsigned int height);
+	Shadow(unsigned int width = 0, unsigned int height = 0);
 	~Shadow();
 	void bind();
 	void un_bind();
 	unsigned int get_depth_map();
 	void rescale_framebuffer(int width, int height);
 private:
+
 	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 	unsigned int depthMapFBO;
 	unsigned int depthMap;

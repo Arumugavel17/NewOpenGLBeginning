@@ -1,7 +1,12 @@
 #include <FrameBuffer.hpp>
 
 FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int samplePoints) {
-    this->samplePoints = samplePoints;
+    normalFrameBuffer(width, height, samplePoints);
+    shadowFrameBuffer();
+}
+
+void FrameBuffer::normalFrameBuffer(unsigned int width, unsigned int height, unsigned int samplePoints) {
+    this->normal_samplePoints = samplePoints;
 
     // Sanity check for sample points
     if (samplePoints < 1) {
@@ -17,38 +22,23 @@ FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int s
         return;
     }
 
-    textureType = (samplePoints > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-
-    glGenFramebuffers(1, &id);
-    glBindFramebuffer(GL_FRAMEBUFFER, id);
+    glGenFramebuffers(1, &normal_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, normal_id);
 
     // Texture creation
-    glGenTextures(1, &texColorBuffer);
-    glBindTexture(textureType, texColorBuffer);
+    glGenTextures(1, &normal_texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, normal_texColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normal_texColorBuffer, 0);
 
-    if (textureType == GL_TEXTURE_2D_MULTISAMPLE) {
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samplePoints, GL_RGB, width, height, GL_TRUE);
-    }
-    else if (textureType == GL_TEXTURE_2D) {
-        glTexImage2D(textureType, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
+    glGenRenderbuffers(1, &normal_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, normal_rbo);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType, texColorBuffer, 0);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
-    // Renderbuffer creation
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-
-    if (textureType == GL_TEXTURE_2D_MULTISAMPLE) {
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, samplePoints, GL_DEPTH24_STENCIL8, width, height);
-    }
-    else {
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    }
-
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, normal_rbo);
 
     // Framebuffer completeness check
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -59,52 +49,52 @@ FrameBuffer::FrameBuffer(unsigned int width, unsigned int height, unsigned int s
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void FrameBuffer::shadowFrameBuffer() {
+    glGenFramebuffers(1, &shadow_depthMapFBO);
+    // create depth texture
+    glGenTextures(1, &shadow_depthMap);
+    glBindTexture(GL_TEXTURE_2D, shadow_depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1920,1080, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-FrameBuffer::~FrameBuffer() {
-	glDeleteFramebuffers(1,&id);
-	glDeleteTextures(1, &texColorBuffer);
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cout << "OpenGL Construct Error Code: " << err << std::endl;
+    }
 }
 
-void FrameBuffer::bind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+FrameBuffer::~FrameBuffer() {
+	glDeleteFramebuffers(1,&normal_id);
+	glDeleteTextures(1, &normal_texColorBuffer);
+}
+
+void FrameBuffer::bind(bool normal) {
+    if (normal) {
+	    glBindFramebuffer(GL_FRAMEBUFFER, normal_id);
+    }
+    else {
+        glBindFramebuffer(GL_FRAMEBUFFER, shadow_depthMapFBO);
+    }
 }
 
 void FrameBuffer::un_bind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-unsigned int FrameBuffer::get_tex_color_buffer() {
-	return texColorBuffer;
-}
-
-void FrameBuffer::rescale_framebuffer(int width, int height) {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glBindTexture(textureType, texColorBuffer);
-
-	if (textureType == GL_TEXTURE_2D_MULTISAMPLE) {
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, this->samplePoints, GL_RGB, width, height, GL_TRUE);
-	}
-	else if (textureType == GL_TEXTURE_2D) {
-		glTexImage2D(textureType, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	}
-
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	if (textureType == GL_TEXTURE_2D_MULTISAMPLE) {
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, this->samplePoints, GL_DEPTH24_STENCIL8, width, height);
-	}
-	else {
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-	}
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType, texColorBuffer, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete after rescaling!" << std::endl;
-	}
-
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+unsigned int FrameBuffer::get_texture(bool normal) {
+    if (normal) {
+	    return normal_texColorBuffer;
+    }
+    else {
+        return shadow_depthMap;
+    }
 }

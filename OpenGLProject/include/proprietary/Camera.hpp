@@ -21,7 +21,7 @@ class Camera{
 public:
     Camera(int screenWidth, int screenHeight);
     glm::mat4 camera_input(GLFWwindow* window);
-    glm::mat4 get_projection();
+    glm::mat4 get_projection(bool perspectiveProjection = true);
     glm::mat4 get_view();
 
     void process_mouse_input_impl(GLFWwindow* window, double xpos, double ypos);
@@ -43,6 +43,8 @@ private:
     float lasttime = 0;
     float currenttime = 0;
     float zoom = 45.0f;
+    float nearPlane = 0.0001f;
+    float farPlane = 100.0f;
     int screenWidth,screenHeight;
     double lastX = 0,lastY = 0,yaw=-90,pitch;
     
